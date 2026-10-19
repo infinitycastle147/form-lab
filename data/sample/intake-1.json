@@ -1,0 +1,16 @@
+{
+  "template": "intake",
+  "source": "synthetic",
+  "pages": [
+    {
+      "number": 1,
+      "fields": {
+        "full_name": "Ada Lovelace",
+        "date": "16 Oct 2026",
+        "reference": "REF-1042",
+        "contact_method": "email",
+        "priority": "routine"
+      }
+    }
+  ]
+}

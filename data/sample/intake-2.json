@@ -1,0 +1,16 @@
+{
+  "template": "intake",
+  "source": "synthetic",
+  "pages": [
+    {
+      "number": 1,
+      "fields": {
+        "full_name": "Grace Hopper",
+        "date": "20 Oct 2026",
+        "reference": "REF-2048",
+        "contact_method": "phone",
+        "priority": "urgent"
+      }
+    }
+  ]
+}

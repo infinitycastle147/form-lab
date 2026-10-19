@@ -1,0 +1,12 @@
+fastapi>=0.115,<1
+uvicorn>=0.30,<1
+python-multipart>=0.0.9,<1
+Pillow>=10,<13
+pypdfium2>=4.30,<6
+pypdf>=5,<7
+opencv-python-headless>=4.10,<6
+pytesseract>=0.3.13,<1
+psutil>=6,<8
+google-genai>=1.0,<3
+python-dotenv>=1.0,<2
+# Install separately for pipelines 3 and 4: paddlepaddle and paddleocr>=3,<4

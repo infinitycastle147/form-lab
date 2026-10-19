@@ -1,0 +1,25 @@
+services:
+  app:
+    build: .
+    image: form-lab:local
+    platform: linux/amd64
+    init: true
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${FORM_LAB_PORT:-8000}:8000"
+    environment:
+      FORM_LAB_DATA_DIR: /data
+      FORM_LAB_AUTH_USER: ${FORM_LAB_AUTH_USER:-}
+      FORM_LAB_AUTH_PASSWORD: ${FORM_LAB_AUTH_PASSWORD:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-3.8-flash}
+      LOCAL_COMPUTE_USD_PER_HOUR: ${LOCAL_COMPUTE_USD_PER_HOUR:-}
+      GEMINI_INPUT_USD_PER_MILLION: ${GEMINI_INPUT_USD_PER_MILLION:-}
+      GEMINI_OUTPUT_USD_PER_MILLION: ${GEMINI_OUTPUT_USD_PER_MILLION:-}
+      GEMINI_CACHED_INPUT_USD_PER_MILLION: ${GEMINI_CACHED_INPUT_USD_PER_MILLION:-}
+    volumes:
+      - form_lab_data:/data
+    shm_size: 1gb
+
+volumes:
+  form_lab_data:

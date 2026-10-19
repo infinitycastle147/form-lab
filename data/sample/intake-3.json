@@ -1,0 +1,16 @@
+{
+  "template": "intake",
+  "source": "synthetic",
+  "pages": [
+    {
+      "number": 1,
+      "fields": {
+        "full_name": "Alan Turing",
+        "date": "05 Nov 2026",
+        "reference": "REF-3021",
+        "contact_method": "post",
+        "priority": "routine"
+      }
+    }
+  ]
+}

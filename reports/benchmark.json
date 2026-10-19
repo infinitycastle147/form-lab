@@ -1,0 +1,2295 @@
+[
+  {
+    "document": "intake-1.pdf",
+    "pipeline": "gemini",
+    "status": "ok",
+    "metrics": {
+      "field_exact_match": 1.0,
+      "document_exact_match": 1.0,
+      "selection_precision": 1.0,
+      "selection_recall": 1.0,
+      "selection_f1": 1.0,
+      "selection_false_positives": 0,
+      "selection_false_negatives": 0,
+      "missed_fields": 0,
+      "cer_wer": {
+        "printed": {
+          "cer": 0.0,
+          "wer": 0.0
+        },
+        "handwriting": {
+          "cer": 0.0,
+          "wer": 0.0
+        }
+      },
+      "high_confidence_error_rate": 0.0,
+      "errors": [],
+      "elapsed_ms": 4888.9,
+      "cpu_ms": 98.0,
+      "process_peak_ram_mb": 108.4,
+      "fallback_fields": 0,
+      "fallback_improved": 0,
+      "fallback_worsened": 0
+    },
+    "result": {
+      "pipeline": "gemini",
+      "template": "intake",
+      "pages": [
+        {
+          "number": 1,
+          "fields": [
+            {
+              "name": "full_name",
+              "label": "Full name",
+              "category": "handwriting",
+              "kind": "text",
+              "value": "Ada Lovelace",
+              "box": [
+                185,
+                218,
+                758,
+                270
+              ],
+              "options": [],
+              "confidence": null,
+              "uncertain": false,
+              "reason": "",
+              "source": "gemini"
+            },
+            {
+              "name": "date",
+              "label": "Date",
+              "category": "handwriting",
+              "kind": "text",
+              "value": "16 Oct 2026",
+              "box": [
+                185,
+                297,
+                500,
+                346
+              ],
+              "options": [],
+              "confidence": null,
+              "uncertain": false,
+              "reason": "",
+              "source": "gemini"
+            },
+            {
+              "name": "reference",
+              "label": "Reference",
+              "category": "printed",
+              "kind": "text",
+              "value": "REF-1042",
+              "box": [
+                185,
+                377,
+                758,
+                425
+              ],
+              "options": [],
+              "confidence": null,
+              "uncertain": false,
+              "reason": "",
+              "source": "gemini"
+            },
+            {
+              "name": "contact_method",
+              "label": "Contact method",
+              "category": "selection",
+              "kind": "choice",
+              "value": "email",
+              "box": null,
+              "options": [
+                {
+                  "value": "email",
+                  "box": [
+                    192,
+                    490,
+                    220,
+                    518
+                  ],
+                  "selected": true
+                },
+                {
+                  "value": "phone",
+                  "box": [
+                    425,
+                    490,
+                    453,
+                    518
+                  ],
+                  "selected": false
+                },
+                {
+                  "value": "post",
+                  "box": [
+                    630,
+                    490,
+                    658,
+                    518
+                  ],
+                  "selected": false
+                }
+              ],
+              "confidence": null,
+              "uncertain": false,
+              "reason": "",
+              "source": "gemini"
+            },
+            {
+              "name": "priority",
+              "label": "Priority",
+              "category": "selection",
+              "kind": "choice",
+              "value": "routine",
+              "box": null,
+              "options": [
+                {
+                  "value": "routine",
+                  "box": [
+                    192,
+                    610,
+                    220,
+                    638
+                  ],
+                  "selected": true
+                },
+                {
+                  "value": "urgent",
+                  "box": [
+                    425,
+                    610,
+                    453,
+                    638
+                  ],
+                  "selected": false
+                }
+              ],
+              "confidence": null,
+              "uncertain": false,
+              "reason": "",
+              "source": "gemini"
+            }
+          ],
+          "alignment": {
+            "method": "original"
+          },
+          "elapsed_ms": 4888.8,
+          "cpu_ms": 98.0
+        }
+      ],
+      "elapsed_ms": 4888.9,
+      "cpu_ms": 98.0,
+      "process_peak_ram_mb": 108.4,
+      "usage": {
+        "input_tokens": 1230,
+        "output_tokens": 102,
+        "fallback_fields": 0
+      },
+      "cost_usd": null,
+      "note": "Peak RAM is a process high-water mark, not isolated per pipeline. Cost needs configured current model rates."
+    }
+  },
+  {
+    "document": "intake-1.pdf",
+    "pipeline": "tesseract",
+    "status": "ok",
+    "metrics": {
+      "field_exact_match": 1.0,
+      "document_exact_match": 1.0,
+      "selection_precision": 1.0,
+      "selection_recall": 1.0,
+      "selection_f1": 1.0,
+      "selection_false_positives": 0,
+      "selection_false_negatives": 0,
+      "missed_fields": 0,
+      "cer_wer": {
+        "printed": {
+          "cer": 0.0,
+          "wer": 0.0
+        },
+        "handwriting": {
+          "cer": 0.0,
+          "wer": 0.0
+        }
+      },
+      "high_confidence_error_rate": 0.0,
+      "errors": [],
+      "elapsed_ms": 768.1,
+      "cpu_ms": 174.1,
+      "process_peak_ram_mb": 133.2,
+      "fallback_fields": 0,
+      "fallback_improved": 0,
+      "fallback_worsened": 0
+    },
+    "result": {
+      "pipeline": "tesseract",
+      "template": "intake",
+      "pages": [
+        {
+          "number": 1,
+          "fields": [
+            {
+              "name": "full_name",
+              "label": "Full name",
+              "category": "handwriting",
+              "kind": "text",
+              "value": "Ada Lovelace",
+              "box": [
+                185,
+                218,
+                758,
+                270
+              ],
+              "confidence": 0.9629257950000001,
+              "uncertain": false,
+              "source": "tesseract"
+            },
+            {
+              "name": "date",
+              "label": "Date",
+              "category": "handwriting",
+              "kind": "text",
+              "value": "16 Oct 2026",
+              "box": [
+                185,
+                297,
+                500,
+                346
+              ],
+              "confidence": 0.9533490466666666,
+              "uncertain": false,
+              "source": "tesseract"
+            },
+            {
+              "name": "reference",
+              "label": "Reference",
+              "category": "printed",
+              "kind": "text",
+              "value": "REF-1042",
+              "box": [
+                185,
+                377,
+                758,
+                425
+              ],
+              "confidence": 0.91600243,
+              "uncertain": false,
+              "source": "tesseract"
+            },
+            {
+              "name": "contact_method",
+              "label": "Contact method",
+              "category": "selection",
+              "kind": "choice",
+              "value": "email",
+              "box": null,
+              "options": [
+                {
+                  "value": "email",
+                  "box": [
+                    192,
+                    490,
+                    220,
+                    518
+                  ],
+                  "ink_ratio": 0.459,
+                  "selected": true
+                },
+                {
+                  "value": "phone",
+                  "box": [
+                    425,
+                    490,
+                    453,
+                    518
+                  ],
+                  "ink_ratio": 0.0,
+                  "selected": false
+                },
+                {
+                  "value": "post",
+                  "box": [
+                    630,
+                    490,
+                    658,
+                    518
+                  ],
+                  "ink_ratio": 0.0,
+                  "selected": false
+                }
+              ],
+              "confidence": null,
+              "uncertain": false,
+              "source": "omr"
+            },
+            {
+              "name": "priority",
+              "label": "Priority",
+              "category": "selection",
+              "kind": "choice",
+              "value": "routine",
+              "box": null,
+              "options": [
+                {
+                  "value": "routine",
+                  "box": [
+                    192,
+                    610,
+                    220,
+                    638
+                  ],
+                  "ink_ratio": 0.459,
+                  "selected": true
+                },
+                {
+                  "value": "urgent",
+                  "box": [
+                    425,
+                    610,
+                    453,
+                    638
+                  ],
+                  "ink_ratio": 0.0,
+                  "selected": false
+                }
+              ],
+              "confidence": null,
+              "uncertain": false,
+              "source": "omr"
+            }
+          ],
+          "alignment": {
+            "method": "resize",
+            "warning": "No reliable page contour"
+          },
+          "elapsed_ms": 768.0,
+          "cpu_ms": 174.1
+        }
+      ],
+      "elapsed_ms": 768.1,
+      "cpu_ms": 174.1,
+      "process_peak_ram_mb": 133.2,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "fallback_fields": 0
+      },
+      "cost_usd": null,
+      "note": "Peak RAM is a process high-water mark, not isolated per pipeline. Cost needs configured current model rates."
+    }
+  },
+  {
+    "document": "intake-1.pdf",
+    "pipeline": "paddle",
+    "status": "ok",
+    "metrics": {
+      "field_exact_match": 1.0,
+      "document_exact_match": 1.0,
+      "selection_precision": 1.0,
+      "selection_recall": 1.0,
+      "selection_f1": 1.0,
+      "selection_false_positives": 0,
+      "selection_false_negatives": 0,
+      "missed_fields": 0,
+      "cer_wer": {
+        "printed": {
+          "cer": 0.0,
+          "wer": 0.0
+        },
+        "handwriting": {
+          "cer": 0.0,
+          "wer": 0.0
+        }
+      },
+      "high_confidence_error_rate": 0.0,
+      "errors": [],
+      "elapsed_ms": 4220.4,
+      "cpu_ms": 2877.7,
+      "process_peak_ram_mb": 693.7,
+      "fallback_fields": 0,
+      "fallback_improved": 0,
+      "fallback_worsened": 0
+    },
+    "result": {
+      "pipeline": "paddle",
+      "template": "intake",
+      "pages": [
+        {
+          "number": 1,
+          "fields": [
+            {
+              "name": "full_name",
+              "label": "Full name",
+              "category": "handwriting",
+              "kind": "text",
+              "value": "Ada Lovelace",
+              "box": [
+                185,
+                218,
+                758,
+                270
+              ],
+              "confidence": 0.9999790191650391,
+              "uncertain": false,
+              "source": "paddle"
+            },
+            {
+              "name": "date",
+              "label": "Date",
+              "category": "handwriting",
+              "kind": "text",
+              "value": "16 Oct 2026",
+              "box": [
+                185,
+                297,
+                500,
+                346
+              ],
+              "confidence": 0.9999217987060547,
+              "uncertain": false,
+              "source": "paddle"
+            },
+            {
+              "name": "reference",
+              "label": "Reference",
+              "category": "printed",
+              "kind": "text",
+              "value": "REF-1042",
+              "box": [
+                185,
+                377,
+                758,
+                425
+              ],
+              "confidence": 0.999995231628418,
+              "uncertain": false,
+              "source": "paddle"
+            },
+            {
+              "name": "contact_method",
+              "label": "Contact method",
+              "category": "selection",
+              "kind": "choice",
+              "value": "email",
+              "box": null,
+              "options": [
+                {
+                  "value": "email",
+                  "box": [
+                    192,
+                    490,
+                    220,
+                    518
+                  ],
+                  "ink_ratio": 0.459,
+                  "selected": true
+                },
+                {
+                  "value": "phone",
+                  "box": [
+                    425,
+                    490,
+                    453,
+                    518
+                  ],
+                  "ink_ratio": 0.0,
+                  "selected": false
+                },
+                {
+                  "value": "post",
+                  "box": [
+                    630,
+                    490,
+                    658,
+                    518
+                  ],
+                  "ink_ratio": 0.0,
+                  "selected": false
+                }
+              ],
+              "confidence": null,
+              "uncertain": false,
+              "source": "omr"
+            },
+            {
+              "name": "priority",
+              "label": "Priority",
+              "category": "selection",
+              "kind": "choice",
+              "value": "routine",
+              "box": null,
+              "options": [
+                {
+                  "value": "routine",
+                  "box": [
+                    192,
+                    610,
+                    220,
+                    638
+                  ],
+                  "ink_ratio": 0.459,
+                  "selected": true
+                },
+                {
+                  "value": "urgent",
+                  "box": [
+                    425,
+                    610,
+                    453,
+                    638
+                  ],
+                  "ink_ratio": 0.0,
+                  "selected": false
+                }
+              ],
+              "confidence": null,
+              "uncertain": false,
+              "source": "omr"
+            }
+          ],
+          "alignment": {
+            "method": "resize",
+            "warning": "No reliable page contour"
+          },
+          "elapsed_ms": 4220.4,
+          "cpu_ms": 2877.7
+        }
+      ],
+      "elapsed_ms": 4220.4,
+      "cpu_ms": 2877.7,
+      "process_peak_ram_mb": 693.7,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "fallback_fields": 0
+      },
+      "cost_usd": null,
+      "note": "Peak RAM is a process high-water mark, not isolated per pipeline. Cost needs configured current model rates."
+    }
+  },
+  {
+    "document": "intake-1.pdf",
+    "pipeline": "hybrid",
+    "status": "ok",
+    "metrics": {
+      "field_exact_match": 1.0,
+      "document_exact_match": 1.0,
+      "selection_precision": 1.0,
+      "selection_recall": 1.0,
+      "selection_f1": 1.0,
+      "selection_false_positives": 0,
+      "selection_false_negatives": 0,
+      "missed_fields": 0,
+      "cer_wer": {
+        "printed": {
+          "cer": 0.0,
+          "wer": 0.0
+        },
+        "handwriting": {
+          "cer": 0.0,
+          "wer": 0.0
+        }
+      },
+      "high_confidence_error_rate": 0.0,
+      "errors": [],
+      "elapsed_ms": 542.7,
+      "cpu_ms": 560.0,
+      "process_peak_ram_mb": 693.7,
+      "fallback_fields": 0,
+      "fallback_improved": 0,
+      "fallback_worsened": 0
+    },
+    "result": {
+      "pipeline": "hybrid",
+      "template": "intake",
+      "pages": [
+        {
+          "number": 1,
+          "fields": [
+            {
+              "name": "full_name",
+              "label": "Full name",
+              "category": "handwriting",
+              "kind": "text",
+              "value": "Ada Lovelace",
+              "box": [
+                185,
+                218,
+                758,
+                270
+              ],
+              "confidence": 0.9999790191650391,
+              "uncertain": false,
+              "source": "paddle"
+            },
+            {
+              "name": "date",
+              "label": "Date",
+              "category": "handwriting",
+              "kind": "text",
+              "value": "16 Oct 2026",
+              "box": [
+                185,
+                297,
+                500,
+                346
+              ],
+              "confidence": 0.9999217987060547,
+              "uncertain": false,
+              "source": "paddle"
+            },
+            {
+              "name": "reference",
+              "label": "Reference",
+              "category": "printed",
+              "kind": "text",
+              "value": "REF-1042",
+              "box": [
+                185,
+                377,
+                758,
+                425
+              ],
+              "confidence": 0.999995231628418,
+              "uncertain": false,
+              "source": "paddle"
+            },
+            {
+              "name": "contact_method",
+              "label": "Contact method",
+              "category": "selection",
+              "kind": "choice",
+              "value": "email",
+              "box": null,
+              "options": [
+                {
+                  "value": "email",
+                  "box": [
+                    192,
+                    490,
+                    220,
+                    518
+                  ],
+                  "ink_ratio": 0.459,
+                  "selected": true
+                },
+                {
+                  "value": "phone",
+                  "box": [
+                    425,
+                    490,
+                    453,
+                    518
+                  ],
+                  "ink_ratio": 0.0,
+                  "selected": false
+                },
+                {
+                  "value": "post",
+                  "box": [
+                    630,
+                    490,
+                    658,
+                    518
+                  ],
+                  "ink_ratio": 0.0,
+                  "selected": false
+                }
+              ],
+              "confidence": null,
+              "uncertain": false,
+              "source": "omr"
+            },
+            {
+              "name": "priority",
+              "label": "Priority",
+              "category": "selection",
+              "kind": "choice",
+              "value": "routine",
+              "box": null,
+              "options": [
+                {
+                  "value": "routine",
+                  "box": [
+                    192,
+                    610,
+                    220,
+                    638
+                  ],
+                  "ink_ratio": 0.459,
+                  "selected": true
+                },
+                {
+                  "value": "urgent",
+                  "box": [
+                    425,
+                    610,
+                    453,
+                    638
+                  ],
+                  "ink_ratio": 0.0,
+                  "selected": false
+                }
+              ],
+              "confidence": null,
+              "uncertain": false,
+              "source": "omr"
+            }
+          ],
+          "alignment": {
+            "method": "resize",
+            "warning": "No reliable page contour"
+          },
+          "elapsed_ms": 542.7,
+          "cpu_ms": 560.0
+        }
+      ],
+      "elapsed_ms": 542.7,
+      "cpu_ms": 560.0,
+      "process_peak_ram_mb": 693.7,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "fallback_fields": 0
+      },
+      "cost_usd": null,
+      "note": "Peak RAM is a process high-water mark, not isolated per pipeline. Cost needs configured current model rates."
+    }
+  },
+  {
+    "document": "intake-2.pdf",
+    "pipeline": "gemini",
+    "status": "ok",
+    "metrics": {
+      "field_exact_match": 1.0,
+      "document_exact_match": 1.0,
+      "selection_precision": 1.0,
+      "selection_recall": 1.0,
+      "selection_f1": 1.0,
+      "selection_false_positives": 0,
+      "selection_false_negatives": 0,
+      "missed_fields": 0,
+      "cer_wer": {
+        "printed": {
+          "cer": 0.0,
+          "wer": 0.0
+        },
+        "handwriting": {
+          "cer": 0.0,
+          "wer": 0.0
+        }
+      },
+      "high_confidence_error_rate": 0.0,
+      "errors": [],
+      "elapsed_ms": 9168.4,
+      "cpu_ms": 59.6,
+      "process_peak_ram_mb": 693.7,
+      "fallback_fields": 0,
+      "fallback_improved": 0,
+      "fallback_worsened": 0
+    },
+    "result": {
+      "pipeline": "gemini",
+      "template": "intake",
+      "pages": [
+        {
+          "number": 1,
+          "fields": [
+            {
+              "name": "full_name",
+              "label": "Full name",
+              "category": "handwriting",
+              "kind": "text",
+              "value": "Grace Hopper",
+              "box": [
+                185,
+                218,
+                758,
+                270
+              ],
+              "options": [],
+              "confidence": null,
+              "uncertain": false,
+              "reason": "Clearly legible text",
+              "source": "gemini"
+            },
+            {
+              "name": "date",
+              "label": "Date",
+              "category": "handwriting",
+              "kind": "text",
+              "value": "20 Oct 2026",
+              "box": [
+                185,
+                297,
+                500,
+                346
+              ],
+              "options": [],
+              "confidence": null,
+              "uncertain": false,
+              "reason": "Clearly legible text",
+              "source": "gemini"
+            },
+            {
+              "name": "reference",
+              "label": "Reference",
+              "category": "printed",
+              "kind": "text",
+              "value": "REF-2048",
+              "box": [
+                185,
+                377,
+                758,
+                425
+              ],
+              "options": [],
+              "confidence": null,
+              "uncertain": false,
+              "reason": "Clearly legible text",
+              "source": "gemini"
+            },
+            {
+              "name": "contact_method",
+              "label": "Contact method",
+              "category": "selection",
+              "kind": "choice",
+              "value": "phone",
+              "box": null,
+              "options": [
+                {
+                  "value": "email",
+                  "box": [
+                    192,
+                    490,
+                    220,
+                    518
+                  ],
+                  "selected": false
+                },
+                {
+                  "value": "phone",
+                  "box": [
+                    425,
+                    490,
+                    453,
+                    518
+                  ],
+                  "selected": true
+                },
+                {
+                  "value": "post",
+                  "box": [
+                    630,
+                    490,
+                    658,
+                    518
+                  ],
+                  "selected": false
+                }
+              ],
+              "confidence": null,
+              "uncertain": false,
+              "reason": "Checkbox for 'Phone' is checked",
+              "source": "gemini"
+            },
+            {
+              "name": "priority",
+              "label": "Priority",
+              "category": "selection",
+              "kind": "choice",
+              "value": "urgent",
+              "box": null,
+              "options": [
+                {
+                  "value": "routine",
+                  "box": [
+                    192,
+                    610,
+                    220,
+                    638
+                  ],
+                  "selected": false
+                },
+                {
+                  "value": "urgent",
+                  "box": [
+                    425,
+                    610,
+                    453,
+                    638
+                  ],
+                  "selected": true
+                }
+              ],
+              "confidence": null,
+              "uncertain": false,
+              "reason": "Checkbox for 'Urgent' is checked",
+              "source": "gemini"
+            }
+          ],
+          "alignment": {
+            "method": "original"
+          },
+          "elapsed_ms": 9168.3,
+          "cpu_ms": 59.6
+        }
+      ],
+      "elapsed_ms": 9168.4,
+      "cpu_ms": 59.6,
+      "process_peak_ram_mb": 693.7,
+      "usage": {
+        "input_tokens": 1230,
+        "output_tokens": 120,
+        "fallback_fields": 0
+      },
+      "cost_usd": null,
+      "note": "Peak RAM is a process high-water mark, not isolated per pipeline. Cost needs configured current model rates."
+    }
+  },
+  {
+    "document": "intake-2.pdf",
+    "pipeline": "tesseract",
+    "status": "ok",
+    "metrics": {
+      "field_exact_match": 1.0,
+      "document_exact_match": 1.0,
+      "selection_precision": 1.0,
+      "selection_recall": 1.0,
+      "selection_f1": 1.0,
+      "selection_false_positives": 0,
+      "selection_false_negatives": 0,
+      "missed_fields": 0,
+      "cer_wer": {
+        "printed": {
+          "cer": 0.0,
+          "wer": 0.0
+        },
+        "handwriting": {
+          "cer": 0.0,
+          "wer": 0.0
+        }
+      },
+      "high_confidence_error_rate": 0.0,
+      "errors": [],
+      "elapsed_ms": 416.8,
+      "cpu_ms": 143.7,
+      "process_peak_ram_mb": 693.7,
+      "fallback_fields": 0,
+      "fallback_improved": 0,
+      "fallback_worsened": 0
+    },
+    "result": {
+      "pipeline": "tesseract",
+      "template": "intake",
+      "pages": [
+        {
+          "number": 1,
+          "fields": [
+            {
+              "name": "full_name",
+              "label": "Full name",
+              "category": "handwriting",
+              "kind": "text",
+              "value": "Grace Hopper",
+              "box": [
+                185,
+                218,
+                758,
+                270
+              ],
+              "confidence": 0.9677063,
+              "uncertain": false,
+              "source": "tesseract"
+            },
+            {
+              "name": "date",
+              "label": "Date",
+              "category": "handwriting",
+              "kind": "text",
+              "value": "20 Oct 2026",
+              "box": [
+                185,
+                297,
+                500,
+                346
+              ],
+              "confidence": 0.96594597,
+              "uncertain": false,
+              "source": "tesseract"
+            },
+            {
+              "name": "reference",
+              "label": "Reference",
+              "category": "printed",
+              "kind": "text",
+              "value": "REF-2048",
+              "box": [
+                185,
+                377,
+                758,
+                425
+              ],
+              "confidence": 0.9157922399999999,
+              "uncertain": false,
+              "source": "tesseract"
+            },
+            {
+              "name": "contact_method",
+              "label": "Contact method",
+              "category": "selection",
+              "kind": "choice",
+              "value": "phone",
+              "box": null,
+              "options": [
+                {
+                  "value": "email",
+                  "box": [
+                    192,
+                    490,
+                    220,
+                    518
+                  ],
+                  "ink_ratio": 0.0,
+                  "selected": false
+                },
+                {
+                  "value": "phone",
+                  "box": [
+                    425,
+                    490,
+                    453,
+                    518
+                  ],
+                  "ink_ratio": 0.459,
+                  "selected": true
+                },
+                {
+                  "value": "post",
+                  "box": [
+                    630,
+                    490,
+                    658,
+                    518
+                  ],
+                  "ink_ratio": 0.0,
+                  "selected": false
+                }
+              ],
+              "confidence": null,
+              "uncertain": false,
+              "source": "omr"
+            },
+            {
+              "name": "priority",
+              "label": "Priority",
+              "category": "selection",
+              "kind": "choice",
+              "value": "urgent",
+              "box": null,
+              "options": [
+                {
+                  "value": "routine",
+                  "box": [
+                    192,
+                    610,
+                    220,
+                    638
+                  ],
+                  "ink_ratio": 0.0,
+                  "selected": false
+                },
+                {
+                  "value": "urgent",
+                  "box": [
+                    425,
+                    610,
+                    453,
+                    638
+                  ],
+                  "ink_ratio": 0.459,
+                  "selected": true
+                }
+              ],
+              "confidence": null,
+              "uncertain": false,
+              "source": "omr"
+            }
+          ],
+          "alignment": {
+            "method": "resize",
+            "warning": "No reliable page contour"
+          },
+          "elapsed_ms": 416.7,
+          "cpu_ms": 143.7
+        }
+      ],
+      "elapsed_ms": 416.8,
+      "cpu_ms": 143.7,
+      "process_peak_ram_mb": 693.7,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "fallback_fields": 0
+      },
+      "cost_usd": null,
+      "note": "Peak RAM is a process high-water mark, not isolated per pipeline. Cost needs configured current model rates."
+    }
+  },
+  {
+    "document": "intake-2.pdf",
+    "pipeline": "paddle",
+    "status": "ok",
+    "metrics": {
+      "field_exact_match": 1.0,
+      "document_exact_match": 1.0,
+      "selection_precision": 1.0,
+      "selection_recall": 1.0,
+      "selection_f1": 1.0,
+      "selection_false_positives": 0,
+      "selection_false_negatives": 0,
+      "missed_fields": 0,
+      "cer_wer": {
+        "printed": {
+          "cer": 0.0,
+          "wer": 0.0
+        },
+        "handwriting": {
+          "cer": 0.0,
+          "wer": 0.0
+        }
+      },
+      "high_confidence_error_rate": 0.0,
+      "errors": [],
+      "elapsed_ms": 538.8,
+      "cpu_ms": 556.3,
+      "process_peak_ram_mb": 693.7,
+      "fallback_fields": 0,
+      "fallback_improved": 0,
+      "fallback_worsened": 0
+    },
+    "result": {
+      "pipeline": "paddle",
+      "template": "intake",
+      "pages": [
+        {
+          "number": 1,
+          "fields": [
+            {
+              "name": "full_name",
+              "label": "Full name",
+              "category": "handwriting",
+              "kind": "text",
+              "value": "Grace Hopper",
+              "box": [
+                185,
+                218,
+                758,
+                270
+              ],
+              "confidence": 0.9999918937683105,
+              "uncertain": false,
+              "source": "paddle"
+            },
+            {
+              "name": "date",
+              "label": "Date",
+              "category": "handwriting",
+              "kind": "text",
+              "value": "20 Oct 2026",
+              "box": [
+                185,
+                297,
+                500,
+                346
+              ],
+              "confidence": 0.9994543194770813,
+              "uncertain": false,
+              "source": "paddle"
+            },
+            {
+              "name": "reference",
+              "label": "Reference",
+              "category": "printed",
+              "kind": "text",
+              "value": "REF-2048",
+              "box": [
+                185,
+                377,
+                758,
+                425
+              ],
+              "confidence": 0.999995231628418,
+              "uncertain": false,
+              "source": "paddle"
+            },
+            {
+              "name": "contact_method",
+              "label": "Contact method",
+              "category": "selection",
+              "kind": "choice",
+              "value": "phone",
+              "box": null,
+              "options": [
+                {
+                  "value": "email",
+                  "box": [
+                    192,
+                    490,
+                    220,
+                    518
+                  ],
+                  "ink_ratio": 0.0,
+                  "selected": false
+                },
+                {
+                  "value": "phone",
+                  "box": [
+                    425,
+                    490,
+                    453,
+                    518
+                  ],
+                  "ink_ratio": 0.459,
+                  "selected": true
+                },
+                {
+                  "value": "post",
+                  "box": [
+                    630,
+                    490,
+                    658,
+                    518
+                  ],
+                  "ink_ratio": 0.0,
+                  "selected": false
+                }
+              ],
+              "confidence": null,
+              "uncertain": false,
+              "source": "omr"
+            },
+            {
+              "name": "priority",
+              "label": "Priority",
+              "category": "selection",
+              "kind": "choice",
+              "value": "urgent",
+              "box": null,
+              "options": [
+                {
+                  "value": "routine",
+                  "box": [
+                    192,
+                    610,
+                    220,
+                    638
+                  ],
+                  "ink_ratio": 0.0,
+                  "selected": false
+                },
+                {
+                  "value": "urgent",
+                  "box": [
+                    425,
+                    610,
+                    453,
+                    638
+                  ],
+                  "ink_ratio": 0.459,
+                  "selected": true
+                }
+              ],
+              "confidence": null,
+              "uncertain": false,
+              "source": "omr"
+            }
+          ],
+          "alignment": {
+            "method": "resize",
+            "warning": "No reliable page contour"
+          },
+          "elapsed_ms": 538.7,
+          "cpu_ms": 556.3
+        }
+      ],
+      "elapsed_ms": 538.8,
+      "cpu_ms": 556.3,
+      "process_peak_ram_mb": 693.7,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "fallback_fields": 0
+      },
+      "cost_usd": null,
+      "note": "Peak RAM is a process high-water mark, not isolated per pipeline. Cost needs configured current model rates."
+    }
+  },
+  {
+    "document": "intake-2.pdf",
+    "pipeline": "hybrid",
+    "status": "ok",
+    "metrics": {
+      "field_exact_match": 1.0,
+      "document_exact_match": 1.0,
+      "selection_precision": 1.0,
+      "selection_recall": 1.0,
+      "selection_f1": 1.0,
+      "selection_false_positives": 0,
+      "selection_false_negatives": 0,
+      "missed_fields": 0,
+      "cer_wer": {
+        "printed": {
+          "cer": 0.0,
+          "wer": 0.0
+        },
+        "handwriting": {
+          "cer": 0.0,
+          "wer": 0.0
+        }
+      },
+      "high_confidence_error_rate": 0.0,
+      "errors": [],
+      "elapsed_ms": 535.0,
+      "cpu_ms": 551.4,
+      "process_peak_ram_mb": 693.7,
+      "fallback_fields": 0,
+      "fallback_improved": 0,
+      "fallback_worsened": 0
+    },
+    "result": {
+      "pipeline": "hybrid",
+      "template": "intake",
+      "pages": [
+        {
+          "number": 1,
+          "fields": [
+            {
+              "name": "full_name",
+              "label": "Full name",
+              "category": "handwriting",
+              "kind": "text",
+              "value": "Grace Hopper",
+              "box": [
+                185,
+                218,
+                758,
+                270
+              ],
+              "confidence": 0.9999918937683105,
+              "uncertain": false,
+              "source": "paddle"
+            },
+            {
+              "name": "date",
+              "label": "Date",
+              "category": "handwriting",
+              "kind": "text",
+              "value": "20 Oct 2026",
+              "box": [
+                185,
+                297,
+                500,
+                346
+              ],
+              "confidence": 0.9994543194770813,
+              "uncertain": false,
+              "source": "paddle"
+            },
+            {
+              "name": "reference",
+              "label": "Reference",
+              "category": "printed",
+              "kind": "text",
+              "value": "REF-2048",
+              "box": [
+                185,
+                377,
+                758,
+                425
+              ],
+              "confidence": 0.999995231628418,
+              "uncertain": false,
+              "source": "paddle"
+            },
+            {
+              "name": "contact_method",
+              "label": "Contact method",
+              "category": "selection",
+              "kind": "choice",
+              "value": "phone",
+              "box": null,
+              "options": [
+                {
+                  "value": "email",
+                  "box": [
+                    192,
+                    490,
+                    220,
+                    518
+                  ],
+                  "ink_ratio": 0.0,
+                  "selected": false
+                },
+                {
+                  "value": "phone",
+                  "box": [
+                    425,
+                    490,
+                    453,
+                    518
+                  ],
+                  "ink_ratio": 0.459,
+                  "selected": true
+                },
+                {
+                  "value": "post",
+                  "box": [
+                    630,
+                    490,
+                    658,
+                    518
+                  ],
+                  "ink_ratio": 0.0,
+                  "selected": false
+                }
+              ],
+              "confidence": null,
+              "uncertain": false,
+              "source": "omr"
+            },
+            {
+              "name": "priority",
+              "label": "Priority",
+              "category": "selection",
+              "kind": "choice",
+              "value": "urgent",
+              "box": null,
+              "options": [
+                {
+                  "value": "routine",
+                  "box": [
+                    192,
+                    610,
+                    220,
+                    638
+                  ],
+                  "ink_ratio": 0.0,
+                  "selected": false
+                },
+                {
+                  "value": "urgent",
+                  "box": [
+                    425,
+                    610,
+                    453,
+                    638
+                  ],
+                  "ink_ratio": 0.459,
+                  "selected": true
+                }
+              ],
+              "confidence": null,
+              "uncertain": false,
+              "source": "omr"
+            }
+          ],
+          "alignment": {
+            "method": "resize",
+            "warning": "No reliable page contour"
+          },
+          "elapsed_ms": 535.0,
+          "cpu_ms": 551.4
+        }
+      ],
+      "elapsed_ms": 535.0,
+      "cpu_ms": 551.4,
+      "process_peak_ram_mb": 693.7,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "fallback_fields": 0
+      },
+      "cost_usd": null,
+      "note": "Peak RAM is a process high-water mark, not isolated per pipeline. Cost needs configured current model rates."
+    }
+  },
+  {
+    "document": "intake-3.pdf",
+    "pipeline": "gemini",
+    "status": "ok",
+    "metrics": {
+      "field_exact_match": 1.0,
+      "document_exact_match": 1.0,
+      "selection_precision": 1.0,
+      "selection_recall": 1.0,
+      "selection_f1": 1.0,
+      "selection_false_positives": 0,
+      "selection_false_negatives": 0,
+      "missed_fields": 0,
+      "cer_wer": {
+        "printed": {
+          "cer": 0.0,
+          "wer": 0.0
+        },
+        "handwriting": {
+          "cer": 0.0,
+          "wer": 0.0
+        }
+      },
+      "high_confidence_error_rate": 0.0,
+      "errors": [],
+      "elapsed_ms": 4692.0,
+      "cpu_ms": 60.3,
+      "process_peak_ram_mb": 693.7,
+      "fallback_fields": 0,
+      "fallback_improved": 0,
+      "fallback_worsened": 0
+    },
+    "result": {
+      "pipeline": "gemini",
+      "template": "intake",
+      "pages": [
+        {
+          "number": 1,
+          "fields": [
+            {
+              "name": "full_name",
+              "label": "Full name",
+              "category": "handwriting",
+              "kind": "text",
+              "value": "Alan Turing",
+              "box": [
+                185,
+                218,
+                758,
+                270
+              ],
+              "options": [],
+              "confidence": null,
+              "uncertain": false,
+              "reason": "",
+              "source": "gemini"
+            },
+            {
+              "name": "date",
+              "label": "Date",
+              "category": "handwriting",
+              "kind": "text",
+              "value": "05 Nov 2026",
+              "box": [
+                185,
+                297,
+                500,
+                346
+              ],
+              "options": [],
+              "confidence": null,
+              "uncertain": false,
+              "reason": "",
+              "source": "gemini"
+            },
+            {
+              "name": "reference",
+              "label": "Reference",
+              "category": "printed",
+              "kind": "text",
+              "value": "REF-3021",
+              "box": [
+                185,
+                377,
+                758,
+                425
+              ],
+              "options": [],
+              "confidence": null,
+              "uncertain": false,
+              "reason": "",
+              "source": "gemini"
+            },
+            {
+              "name": "contact_method",
+              "label": "Contact method",
+              "category": "selection",
+              "kind": "choice",
+              "value": "post",
+              "box": null,
+              "options": [
+                {
+                  "value": "email",
+                  "box": [
+                    192,
+                    490,
+                    220,
+                    518
+                  ],
+                  "selected": false
+                },
+                {
+                  "value": "phone",
+                  "box": [
+                    425,
+                    490,
+                    453,
+                    518
+                  ],
+                  "selected": false
+                },
+                {
+                  "value": "post",
+                  "box": [
+                    630,
+                    490,
+                    658,
+                    518
+                  ],
+                  "selected": true
+                }
+              ],
+              "confidence": null,
+              "uncertain": false,
+              "reason": "",
+              "source": "gemini"
+            },
+            {
+              "name": "priority",
+              "label": "Priority",
+              "category": "selection",
+              "kind": "choice",
+              "value": "routine",
+              "box": null,
+              "options": [
+                {
+                  "value": "routine",
+                  "box": [
+                    192,
+                    610,
+                    220,
+                    638
+                  ],
+                  "selected": true
+                },
+                {
+                  "value": "urgent",
+                  "box": [
+                    425,
+                    610,
+                    453,
+                    638
+                  ],
+                  "selected": false
+                }
+              ],
+              "confidence": null,
+              "uncertain": false,
+              "reason": "",
+              "source": "gemini"
+            }
+          ],
+          "alignment": {
+            "method": "original"
+          },
+          "elapsed_ms": 4691.9,
+          "cpu_ms": 60.2
+        }
+      ],
+      "elapsed_ms": 4692.0,
+      "cpu_ms": 60.3,
+      "process_peak_ram_mb": 693.7,
+      "usage": {
+        "input_tokens": 1230,
+        "output_tokens": 100,
+        "fallback_fields": 0
+      },
+      "cost_usd": null,
+      "note": "Peak RAM is a process high-water mark, not isolated per pipeline. Cost needs configured current model rates."
+    }
+  },
+  {
+    "document": "intake-3.pdf",
+    "pipeline": "tesseract",
+    "status": "ok",
+    "metrics": {
+      "field_exact_match": 0.4,
+      "document_exact_match": 0.0,
+      "selection_precision": 1.0,
+      "selection_recall": 1.0,
+      "selection_f1": 1.0,
+      "selection_false_positives": 0,
+      "selection_false_negatives": 0,
+      "missed_fields": 1,
+      "cer_wer": {
+        "printed": {
+          "cer": 0.5,
+          "wer": 1.0
+        },
+        "handwriting": {
+          "cer": 0.6363636363636364,
+          "wer": 0.8
+        }
+      },
+      "high_confidence_error_rate": 0.3333333333333333,
+      "errors": [
+        {
+          "page": 1,
+          "field": "full_name",
+          "expected": "Alan Turing",
+          "actual": null
+        },
+        {
+          "page": 1,
+          "field": "date",
+          "expected": "05 Nov 2026",
+          "actual": "05 Nov 20260 8"
+        },
+        {
+          "page": 1,
+          "field": "reference",
+          "expected": "REF-3021",
+          "actual": "REF-3020000"
+        }
+      ],
+      "elapsed_ms": 411.0,
+      "cpu_ms": 143.7,
+      "process_peak_ram_mb": 693.7,
+      "fallback_fields": 0,
+      "fallback_improved": 0,
+      "fallback_worsened": 0
+    },
+    "result": {
+      "pipeline": "tesseract",
+      "template": "intake",
+      "pages": [
+        {
+          "number": 1,
+          "fields": [
+            {
+              "name": "full_name",
+              "label": "Full name",
+              "category": "handwriting",
+              "kind": "text",
+              "value": null,
+              "box": [
+                185,
+                218,
+                758,
+                270
+              ],
+              "confidence": null,
+              "uncertain": true,
+              "source": "tesseract"
+            },
+            {
+              "name": "date",
+              "label": "Date",
+              "category": "handwriting",
+              "kind": "text",
+              "value": "05 Nov 20260 8",
+              "box": [
+                185,
+                297,
+                500,
+                346
+              ],
+              "confidence": 0.710384455,
+              "uncertain": false,
+              "source": "tesseract"
+            },
+            {
+              "name": "reference",
+              "label": "Reference",
+              "category": "printed",
+              "kind": "text",
+              "value": "REF-3020000",
+              "box": [
+                185,
+                377,
+                758,
+                425
+              ],
+              "confidence": 0.09188442000000001,
+              "uncertain": true,
+              "source": "tesseract"
+            },
+            {
+              "name": "contact_method",
+              "label": "Contact method",
+              "category": "selection",
+              "kind": "choice",
+              "value": "post",
+              "box": null,
+              "options": [
+                {
+                  "value": "email",
+                  "box": [
+                    192,
+                    490,
+                    220,
+                    518
+                  ],
+                  "ink_ratio": 0.0,
+                  "selected": false
+                },
+                {
+                  "value": "phone",
+                  "box": [
+                    425,
+                    490,
+                    453,
+                    518
+                  ],
+                  "ink_ratio": 0.0,
+                  "selected": false
+                },
+                {
+                  "value": "post",
+                  "box": [
+                    630,
+                    490,
+                    658,
+                    518
+                  ],
+                  "ink_ratio": 0.367,
+                  "selected": true
+                }
+              ],
+              "confidence": null,
+              "uncertain": false,
+              "source": "omr"
+            },
+            {
+              "name": "priority",
+              "label": "Priority",
+              "category": "selection",
+              "kind": "choice",
+              "value": "routine",
+              "box": null,
+              "options": [
+                {
+                  "value": "routine",
+                  "box": [
+                    192,
+                    610,
+                    220,
+                    638
+                  ],
+                  "ink_ratio": 0.199,
+                  "selected": true
+                },
+                {
+                  "value": "urgent",
+                  "box": [
+                    425,
+                    610,
+                    453,
+                    638
+                  ],
+                  "ink_ratio": 0.0,
+                  "selected": false
+                }
+              ],
+              "confidence": null,
+              "uncertain": false,
+              "source": "omr"
+            }
+          ],
+          "alignment": {
+            "method": "resize",
+            "warning": "No reliable page contour"
+          },
+          "elapsed_ms": 411.0,
+          "cpu_ms": 143.7
+        }
+      ],
+      "elapsed_ms": 411.0,
+      "cpu_ms": 143.7,
+      "process_peak_ram_mb": 693.7,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "fallback_fields": 0
+      },
+      "cost_usd": null,
+      "note": "Peak RAM is a process high-water mark, not isolated per pipeline. Cost needs configured current model rates."
+    }
+  },
+  {
+    "document": "intake-3.pdf",
+    "pipeline": "paddle",
+    "status": "ok",
+    "metrics": {
+      "field_exact_match": 1.0,
+      "document_exact_match": 1.0,
+      "selection_precision": 1.0,
+      "selection_recall": 1.0,
+      "selection_f1": 1.0,
+      "selection_false_positives": 0,
+      "selection_false_negatives": 0,
+      "missed_fields": 0,
+      "cer_wer": {
+        "printed": {
+          "cer": 0.0,
+          "wer": 0.0
+        },
+        "handwriting": {
+          "cer": 0.0,
+          "wer": 0.0
+        }
+      },
+      "high_confidence_error_rate": 0.0,
+      "errors": [],
+      "elapsed_ms": 543.3,
+      "cpu_ms": 560.6,
+      "process_peak_ram_mb": 693.7,
+      "fallback_fields": 0,
+      "fallback_improved": 0,
+      "fallback_worsened": 0
+    },
+    "result": {
+      "pipeline": "paddle",
+      "template": "intake",
+      "pages": [
+        {
+          "number": 1,
+          "fields": [
+            {
+              "name": "full_name",
+              "label": "Full name",
+              "category": "handwriting",
+              "kind": "text",
+              "value": "Alan Turing",
+              "box": [
+                185,
+                218,
+                758,
+                270
+              ],
+              "confidence": 0.999973475933075,
+              "uncertain": false,
+              "source": "paddle"
+            },
+            {
+              "name": "date",
+              "label": "Date",
+              "category": "handwriting",
+              "kind": "text",
+              "value": "05 Nov 2026",
+              "box": [
+                185,
+                297,
+                500,
+                346
+              ],
+              "confidence": 0.9824027419090271,
+              "uncertain": false,
+              "source": "paddle"
+            },
+            {
+              "name": "reference",
+              "label": "Reference",
+              "category": "printed",
+              "kind": "text",
+              "value": "REF-3021",
+              "box": [
+                185,
+                377,
+                758,
+                425
+              ],
+              "confidence": 0.9999951124191284,
+              "uncertain": false,
+              "source": "paddle"
+            },
+            {
+              "name": "contact_method",
+              "label": "Contact method",
+              "category": "selection",
+              "kind": "choice",
+              "value": "post",
+              "box": null,
+              "options": [
+                {
+                  "value": "email",
+                  "box": [
+                    192,
+                    490,
+                    220,
+                    518
+                  ],
+                  "ink_ratio": 0.0,
+                  "selected": false
+                },
+                {
+                  "value": "phone",
+                  "box": [
+                    425,
+                    490,
+                    453,
+                    518
+                  ],
+                  "ink_ratio": 0.0,
+                  "selected": false
+                },
+                {
+                  "value": "post",
+                  "box": [
+                    630,
+                    490,
+                    658,
+                    518
+                  ],
+                  "ink_ratio": 0.367,
+                  "selected": true
+                }
+              ],
+              "confidence": null,
+              "uncertain": false,
+              "source": "omr"
+            },
+            {
+              "name": "priority",
+              "label": "Priority",
+              "category": "selection",
+              "kind": "choice",
+              "value": "routine",
+              "box": null,
+              "options": [
+                {
+                  "value": "routine",
+                  "box": [
+                    192,
+                    610,
+                    220,
+                    638
+                  ],
+                  "ink_ratio": 0.199,
+                  "selected": true
+                },
+                {
+                  "value": "urgent",
+                  "box": [
+                    425,
+                    610,
+                    453,
+                    638
+                  ],
+                  "ink_ratio": 0.0,
+                  "selected": false
+                }
+              ],
+              "confidence": null,
+              "uncertain": false,
+              "source": "omr"
+            }
+          ],
+          "alignment": {
+            "method": "resize",
+            "warning": "No reliable page contour"
+          },
+          "elapsed_ms": 543.3,
+          "cpu_ms": 560.6
+        }
+      ],
+      "elapsed_ms": 543.3,
+      "cpu_ms": 560.6,
+      "process_peak_ram_mb": 693.7,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "fallback_fields": 0
+      },
+      "cost_usd": null,
+      "note": "Peak RAM is a process high-water mark, not isolated per pipeline. Cost needs configured current model rates."
+    }
+  },
+  {
+    "document": "intake-3.pdf",
+    "pipeline": "hybrid",
+    "status": "ok",
+    "metrics": {
+      "field_exact_match": 1.0,
+      "document_exact_match": 1.0,
+      "selection_precision": 1.0,
+      "selection_recall": 1.0,
+      "selection_f1": 1.0,
+      "selection_false_positives": 0,
+      "selection_false_negatives": 0,
+      "missed_fields": 0,
+      "cer_wer": {
+        "printed": {
+          "cer": 0.0,
+          "wer": 0.0
+        },
+        "handwriting": {
+          "cer": 0.0,
+          "wer": 0.0
+        }
+      },
+      "high_confidence_error_rate": 0.0,
+      "errors": [],
+      "elapsed_ms": 538.2,
+      "cpu_ms": 555.9,
+      "process_peak_ram_mb": 693.7,
+      "fallback_fields": 0,
+      "fallback_improved": 0,
+      "fallback_worsened": 0
+    },
+    "result": {
+      "pipeline": "hybrid",
+      "template": "intake",
+      "pages": [
+        {
+          "number": 1,
+          "fields": [
+            {
+              "name": "full_name",
+              "label": "Full name",
+              "category": "handwriting",
+              "kind": "text",
+              "value": "Alan Turing",
+              "box": [
+                185,
+                218,
+                758,
+                270
+              ],
+              "confidence": 0.999973475933075,
+              "uncertain": false,
+              "source": "paddle"
+            },
+            {
+              "name": "date",
+              "label": "Date",
+              "category": "handwriting",
+              "kind": "text",
+              "value": "05 Nov 2026",
+              "box": [
+                185,
+                297,
+                500,
+                346
+              ],
+              "confidence": 0.9824027419090271,
+              "uncertain": false,
+              "source": "paddle"
+            },
+            {
+              "name": "reference",
+              "label": "Reference",
+              "category": "printed",
+              "kind": "text",
+              "value": "REF-3021",
+              "box": [
+                185,
+                377,
+                758,
+                425
+              ],
+              "confidence": 0.9999951124191284,
+              "uncertain": false,
+              "source": "paddle"
+            },
+            {
+              "name": "contact_method",
+              "label": "Contact method",
+              "category": "selection",
+              "kind": "choice",
+              "value": "post",
+              "box": null,
+              "options": [
+                {
+                  "value": "email",
+                  "box": [
+                    192,
+                    490,
+                    220,
+                    518
+                  ],
+                  "ink_ratio": 0.0,
+                  "selected": false
+                },
+                {
+                  "value": "phone",
+                  "box": [
+                    425,
+                    490,
+                    453,
+                    518
+                  ],
+                  "ink_ratio": 0.0,
+                  "selected": false
+                },
+                {
+                  "value": "post",
+                  "box": [
+                    630,
+                    490,
+                    658,
+                    518
+                  ],
+                  "ink_ratio": 0.367,
+                  "selected": true
+                }
+              ],
+              "confidence": null,
+              "uncertain": false,
+              "source": "omr"
+            },
+            {
+              "name": "priority",
+              "label": "Priority",
+              "category": "selection",
+              "kind": "choice",
+              "value": "routine",
+              "box": null,
+              "options": [
+                {
+                  "value": "routine",
+                  "box": [
+                    192,
+                    610,
+                    220,
+                    638
+                  ],
+                  "ink_ratio": 0.199,
+                  "selected": true
+                },
+                {
+                  "value": "urgent",
+                  "box": [
+                    425,
+                    610,
+                    453,
+                    638
+                  ],
+                  "ink_ratio": 0.0,
+                  "selected": false
+                }
+              ],
+              "confidence": null,
+              "uncertain": false,
+              "source": "omr"
+            }
+          ],
+          "alignment": {
+            "method": "resize",
+            "warning": "No reliable page contour"
+          },
+          "elapsed_ms": 538.2,
+          "cpu_ms": 555.9
+        }
+      ],
+      "elapsed_ms": 538.2,
+      "cpu_ms": 555.9,
+      "process_peak_ram_mb": 693.7,
+      "usage": {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "fallback_fields": 0
+      },
+      "cost_usd": null,
+      "note": "Peak RAM is a process high-water mark, not isolated per pipeline. Cost needs configured current model rates."
+    }
+  }
+]

@@ -1,0 +1,34 @@
+{
+  "template": "bank_account",
+  "source": "synthetic_handwriting_style",
+  "pages": [
+    {
+      "number": 1,
+      "fields": {
+        "full_name": "Arjun Mehta",
+        "date_of_birth": "07 Aug 1988",
+        "parent_name": "Neela Mehta",
+        "mobile": "98210 33764",
+        "email": "arjun.mehta@example.test",
+        "tax_id": "BCQPM7824R",
+        "address": "18 Cedar Street, Unit 204",
+        "city": "Mumbai",
+        "postal_code": "400001",
+        "occupation": "Consultant",
+        "branch": "Fort, Mumbai",
+        "initial_deposit": "25,500",
+        "nominee": "Neela Mehta",
+        "nominee_relation": "Mother",
+        "signature": "Arjun Mehta",
+        "signed_date": "18 Oct 2026",
+        "account_type": "current",
+        "ownership": "joint",
+        "kyc_document": "national_id",
+        "debit_card": "no",
+        "statements": "both",
+        "alerts": "email",
+        "declaration": "agree"
+      }
+    }
+  ]
+}

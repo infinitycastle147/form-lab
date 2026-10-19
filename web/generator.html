@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Make a test form — Form Lab</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body class="generator-page">
+  <div class="app">
+    <main id="workspace">
+      <div class="launch-notice" id="launch-notice" hidden>Open this app through the Python server. In the project folder run <code>PYTHONPATH=.deps uvicorn poc.server:app --reload</code>, then visit <a href="http://127.0.0.1:8000">http://127.0.0.1:8000</a>.</div>
+      <header class="topbar">
+        <a class="top-brand" href="/" aria-label="Form Lab home"><span class="top-brand-mark">F<span>↗</span></span><span><strong>FORM LAB</strong><small>FORM GENERATOR</small></span></a>
+        <nav class="top-nav" aria-label="Sections">
+          <a href="/">Comparison</a>
+          <a href="/generator" aria-current="page">Form generator</a>
+          <a href="/templates/editor">Template studio ↗</a>
+        </nav>
+        <div class="top-right"><span class="top-pill" id="api-status">● CHECKING GENERATOR</span><span>LIVE WORKBENCH</span></div>
+      </header>
+
+      <section class="generator" id="generator">
+        <div class="generator-page-header">
+          <div>
+            <div class="eyebrow">SYNTHETIC DOCUMENT STUDIO</div>
+            <h1>Make a test form</h1>
+            <p>Use synthetic applicant data to create a bank form with a matching PDF and answer key. Then open it in the comparison bench.</p>
+          </div>
+          <label class="preset-control" for="preset">STARTING DATA
+            <select id="preset">
+              <option value="0">Maya Desai</option>
+              <option value="1">Arjun Mehta</option>
+              <option value="2">Leena Shah</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="generator-grid">
+          <div class="generator-editor">
+            <form id="generator-form">
+              <div class="generator-fields" id="generator-fields"></div>
+              <div class="generator-choices" id="generator-choices"></div>
+              <div class="generator-actions">
+                <button type="submit" id="generate">Generate one-page form <span>↗</span></button>
+                <span id="generator-message" role="status" aria-live="polite"></span>
+              </div>
+            </form>
+          </div>
+          <div class="generator-preview">
+            <div class="preview-top"><span>PAGE PREVIEW</span><span>1700 × 2200 OUTPUT</span></div>
+            <div class="preview-sheet">
+              <img id="generated-preview" alt="Generated bank account form preview">
+              <div id="preview-placeholder">Generate a form to see the completed page.</div>
+            </div>
+            <div class="download-row" id="downloads" hidden>
+              <a id="download-png">↓ PNG image</a>
+              <a id="download-pdf">↓ PDF</a>
+              <a id="download-json">↓ Answer key</a>
+            </div>
+            <button id="test-generated" disabled>Use this form in comparison <span>↗</span></button>
+          </div>
+        </div>
+      </section>
+      <footer>FORM LAB <span>·</span> MEASURE FIRST, DECIDE SECOND <span class="footer-right">SCANNED FORM EXTRACTION / POC</span></footer>
+    </main>
+  </div>
+  <script src="/static/generator.js"></script>
+</body>
+</html>

@@ -1,0 +1,455 @@
+{
+  "id": "bank_account",
+  "name": "Bank account application \u00b7 dense",
+  "page_size": [
+    850,
+    1100
+  ],
+  "pages": [
+    {
+      "fields": [
+        {
+          "name": "full_name",
+          "label": "Full legal name",
+          "kind": "text",
+          "region": [
+            48,
+            181,
+            510,
+            205
+          ],
+          "category": "handwriting"
+        },
+        {
+          "name": "date_of_birth",
+          "label": "Date of birth",
+          "kind": "text",
+          "region": [
+            530,
+            181,
+            802,
+            205
+          ],
+          "category": "handwriting"
+        },
+        {
+          "name": "parent_name",
+          "label": "Parent / spouse name",
+          "kind": "text",
+          "region": [
+            48,
+            240,
+            510,
+            264
+          ],
+          "category": "handwriting"
+        },
+        {
+          "name": "mobile",
+          "label": "Mobile number",
+          "kind": "text",
+          "region": [
+            530,
+            240,
+            802,
+            264
+          ],
+          "category": "handwriting"
+        },
+        {
+          "name": "email",
+          "label": "Email address",
+          "kind": "text",
+          "region": [
+            48,
+            299,
+            510,
+            323
+          ],
+          "category": "handwriting"
+        },
+        {
+          "name": "tax_id",
+          "label": "Tax ID / PAN",
+          "kind": "text",
+          "region": [
+            530,
+            299,
+            802,
+            323
+          ],
+          "category": "handwriting"
+        },
+        {
+          "name": "address",
+          "label": "Residential address",
+          "kind": "text",
+          "region": [
+            48,
+            358,
+            802,
+            382
+          ],
+          "category": "handwriting"
+        },
+        {
+          "name": "city",
+          "label": "City / town",
+          "kind": "text",
+          "region": [
+            48,
+            417,
+            294,
+            441
+          ],
+          "category": "handwriting"
+        },
+        {
+          "name": "postal_code",
+          "label": "Postal code",
+          "kind": "text",
+          "region": [
+            312,
+            417,
+            536,
+            441
+          ],
+          "category": "handwriting"
+        },
+        {
+          "name": "occupation",
+          "label": "Occupation",
+          "kind": "text",
+          "region": [
+            554,
+            417,
+            802,
+            441
+          ],
+          "category": "handwriting"
+        },
+        {
+          "name": "branch",
+          "label": "Preferred branch",
+          "kind": "text",
+          "region": [
+            48,
+            661,
+            510,
+            685
+          ],
+          "category": "handwriting"
+        },
+        {
+          "name": "initial_deposit",
+          "label": "Initial deposit",
+          "kind": "text",
+          "region": [
+            530,
+            661,
+            802,
+            685
+          ],
+          "category": "handwriting"
+        },
+        {
+          "name": "nominee",
+          "label": "Nominee full name",
+          "kind": "text",
+          "region": [
+            48,
+            901,
+            510,
+            925
+          ],
+          "category": "handwriting"
+        },
+        {
+          "name": "nominee_relation",
+          "label": "Relationship",
+          "kind": "text",
+          "region": [
+            530,
+            901,
+            802,
+            925
+          ],
+          "category": "handwriting"
+        },
+        {
+          "name": "signature",
+          "label": "Applicant signature",
+          "kind": "text",
+          "region": [
+            48,
+            987,
+            510,
+            1011
+          ],
+          "category": "handwriting"
+        },
+        {
+          "name": "signed_date",
+          "label": "Date signed",
+          "kind": "text",
+          "region": [
+            530,
+            987,
+            802,
+            1011
+          ],
+          "category": "handwriting"
+        },
+        {
+          "name": "account_type",
+          "label": "ACCOUNT TYPE",
+          "kind": "choice",
+          "options": [
+            {
+              "value": "savings",
+              "label": "Savings",
+              "region": [
+                265,
+                493,
+                287,
+                515
+              ]
+            },
+            {
+              "value": "current",
+              "label": "Current",
+              "region": [
+                425,
+                493,
+                447,
+                515
+              ]
+            },
+            {
+              "value": "salary",
+              "label": "Salary",
+              "region": [
+                575,
+                493,
+                597,
+                515
+              ]
+            },
+            {
+              "value": "student",
+              "label": "Student",
+              "region": [
+                715,
+                493,
+                737,
+                515
+              ]
+            }
+          ]
+        },
+        {
+          "name": "ownership",
+          "label": "OPERATING MODE",
+          "kind": "choice",
+          "options": [
+            {
+              "value": "single",
+              "label": "Single",
+              "region": [
+                265,
+                543,
+                287,
+                565
+              ]
+            },
+            {
+              "value": "joint",
+              "label": "Joint",
+              "region": [
+                425,
+                543,
+                447,
+                565
+              ]
+            },
+            {
+              "value": "either",
+              "label": "Either / survivor",
+              "region": [
+                575,
+                543,
+                597,
+                565
+              ]
+            }
+          ]
+        },
+        {
+          "name": "kyc_document",
+          "label": "ID ATTACHED",
+          "kind": "choice",
+          "options": [
+            {
+              "value": "passport",
+              "label": "Passport",
+              "region": [
+                265,
+                593,
+                287,
+                615
+              ]
+            },
+            {
+              "value": "national_id",
+              "label": "National ID",
+              "region": [
+                425,
+                593,
+                447,
+                615
+              ]
+            },
+            {
+              "value": "driving_licence",
+              "label": "Driving licence",
+              "region": [
+                575,
+                593,
+                597,
+                615
+              ]
+            }
+          ]
+        },
+        {
+          "name": "debit_card",
+          "label": "DEBIT CARD",
+          "kind": "choice",
+          "options": [
+            {
+              "value": "yes",
+              "label": "Yes",
+              "region": [
+                265,
+                735,
+                287,
+                757
+              ]
+            },
+            {
+              "value": "no",
+              "label": "No",
+              "region": [
+                425,
+                735,
+                447,
+                757
+              ]
+            }
+          ]
+        },
+        {
+          "name": "statements",
+          "label": "STATEMENTS",
+          "kind": "choice",
+          "options": [
+            {
+              "value": "email",
+              "label": "Email",
+              "region": [
+                265,
+                785,
+                287,
+                807
+              ]
+            },
+            {
+              "value": "post",
+              "label": "Post",
+              "region": [
+                425,
+                785,
+                447,
+                807
+              ]
+            },
+            {
+              "value": "both",
+              "label": "Both",
+              "region": [
+                575,
+                785,
+                597,
+                807
+              ]
+            }
+          ]
+        },
+        {
+          "name": "alerts",
+          "label": "ACCOUNT ALERTS",
+          "kind": "choice",
+          "options": [
+            {
+              "value": "sms",
+              "label": "SMS",
+              "region": [
+                265,
+                835,
+                287,
+                857
+              ]
+            },
+            {
+              "value": "email",
+              "label": "Email",
+              "region": [
+                425,
+                835,
+                447,
+                857
+              ]
+            },
+            {
+              "value": "none",
+              "label": "None",
+              "region": [
+                575,
+                835,
+                597,
+                857
+              ]
+            }
+          ]
+        },
+        {
+          "name": "declaration",
+          "label": "DECLARATION",
+          "kind": "choice",
+          "options": [
+            {
+              "value": "agree",
+              "label": "Agree",
+              "region": [
+                490,
+                945,
+                512,
+                967
+              ]
+            },
+            {
+              "value": "decline",
+              "label": "Decline",
+              "region": [
+                630,
+                945,
+                652,
+                967
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

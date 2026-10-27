@@ -52,6 +52,23 @@ python3 -m poc.evaluate --dataset data/sample --output reports/benchmark.json
 
 The program records unavailable routes as such, preserving comparable document rows. It reports field exact match, whole-document exact match, printed and handwriting CER/WER, selection precision/recall/F1, missed fields, high-confidence error rate, latency, CPU time, sampled RAM, Gemini token counts, estimated costs, and fallback corrections/regressions. The UI displays the uploaded page, field comparison, uncertainty, template boxes, fallback decisions in JSON, timings, and dependency errors. `/docs` provides the API schema.
 
+## Dynamic extraction (separate workflow)
+
+Open **Dynamic extraction** at `/dynamic`. Enter the required output schema as JSON, then upload a completed PDF. The page uploads the PDF and starts extraction automatically; editing the schema afterward enables a new run. The result is a flat JSON object with exactly the requested keys. Missing, conflicting, or invalid values are `null`; the inspection panel shows the matched question, page, source, and review status. Use **Download JSON** for the values object.
+
+The schema can be a list of keys or an object with descriptions, types (`string`, `date`, `number`, `boolean`, `choice`), aliases, and `allowed_values`. Descriptions and aliases are especially useful when a form question uses different wording from the output key. For example:
+
+```json
+{
+  "applicant_name": {"description": "Full name of the applicant", "aliases": ["Name", "Customer name"]},
+  "date_of_birth": {"description": "Applicant birth date", "type": "date", "aliases": ["DOB", "Birth date"]}
+}
+```
+
+This route does not save or require a template. OpenCV rectifies a clear photographed page boundary or moderate tilt, and enlarges only small pages. Extraction uses PDF form widgets and positioned text from local PaddleOCR, with Tesseract fallback for missing fields. The dynamic route never calls Gemini, even if `GEMINI_API_KEY` is configured; the existing comparison routes still work as before. Supply aliases when the form wording differs from a schema key. OCR matches are flagged for review, and handwriting or unfamiliar wording may remain `null`. Results need validation against real completed forms before production use.
+
+The first dynamic run can be slow because it recognizes text across the full page and loads the local Paddle models. The app holds a bounded in-memory OCR cache for the latest eight distinct PDFs, so rerunning with an edited schema or re-uploading the same PDF reuses recognized text. Restarting the server clears this cache. The dynamic route shares the Paddle engine with the comparison route to avoid loading two copies into memory.
+
 ## Register and edit form templates
 
 Open **Template studio** from the top navigation or visit `/templates/editor`. Upload a flat, complete blank PDF or image as the reference form; detection starts automatically. Use the page selector to inspect every page, remove false detections, add missed fields, drag or resize boxes, and set stable output names, display labels, text categories, checkbox values, and dropdown values. **Re-detect all pages** reruns detection after changing settings. Interactive PDFs supply exact field rectangles through their AcroForm widgets; scanned pages use OpenCV candidates. The meaning of a field cannot always be inferred reliably, so review is part of registration. Click **Register template**; it appears immediately in the comparison form. Open any registered template there to revise it later. Keep the reference page and mapped boxes in the same orientation.

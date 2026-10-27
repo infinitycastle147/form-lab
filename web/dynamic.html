@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dynamic extraction — Form Lab</title><link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/static/dynamic.css?v=1"></head>
+<body class="dynamic-page"><div class="app"><main>
+  <header class="topbar"><a class="top-brand" href="/"><span class="top-brand-mark">F<span>↗</span></span><span><strong>FORM LAB</strong><small>DYNAMIC EXTRACTION</small></span></a><nav class="top-nav" aria-label="Sections"><a href="/">Comparison</a><a href="/dynamic" aria-current="page">Dynamic extraction</a><a href="/generator">Form generator</a><a href="/templates/editor">Template studio ↗</a></nav><div class="top-right"><span class="top-pill" id="engine-state">● READY TO SCAN</span></div></header>
+  <section class="dynamic-hero"><div><div class="eyebrow">FORM LAB / ONE-OFF DOCUMENTS</div><h1>Any form.<br><em>Your fields.</em></h1><p>Upload a completed PDF and define the keys you need. The page is corrected when necessary, then each answer is located and read without registering a template.</p></div><div class="hero-sequence" aria-hidden="true"><span>01 / PDF</span><i>→</i><span>02 / SCHEMA</span><i>→</i><span>03 / JSON</span></div></section>
+  <section class="dynamic-workbench"><div class="input-column">
+    <div class="section-kicker"><span>INPUT / 01</span><span>PDF DOCUMENT</span></div>
+    <label class="pdf-drop" id="pdf-drop" for="pdf-file"><input id="pdf-file" type="file" accept="application/pdf,.pdf"><span class="drop-glyph">↥</span><strong>Drop a completed PDF here</strong><small>or click to browse · up to 25 MB and 20 pages</small><span id="file-name" class="file-name">NO DOCUMENT SELECTED</span></label>
+    <div class="section-kicker schema-heading"><span>INPUT / 02</span><span>OUTPUT SCHEMA · REQUIRED</span></div>
+    <div class="schema-panel"><div class="schema-top"><label for="schema-input">Field definitions</label><span id="schema-count">0 keys</span></div><p>Use your desired JSON keys. Descriptions and aliases help match different wording on the form.</p><textarea id="schema-input" spellcheck="false" aria-describedby="schema-help">{
+  "applicant_name": {
+    "description": "Full name of the applicant",
+    "aliases": ["Full name", "Applicant name", "Name", "Customer name"]
+  },
+  "date_of_birth": {
+    "description": "Applicant's birth date",
+    "type": "date",
+    "aliases": ["Date of birth", "DOB", "Birth date"]
+  }
+}</textarea><div id="schema-help" class="schema-help">Edit this JSON for your form. Extraction starts after you upload a PDF.</div><div id="schema-error" class="schema-error" role="alert" hidden></div></div>
+    <div class="action-row"><button id="run-again" type="button" disabled>Run extraction <span>↗</span></button><span id="run-hint">Waiting for a PDF and valid schema.</span></div><p class="provider-note">This workflow runs locally using PDF form fields, OpenCV, and PaddleOCR with Tesseract fallback. No document page is sent to Gemini.</p>
+  </div><div class="output-column">
+    <div class="section-kicker"><span>OUTPUT / 03</span><span>EXTRACTED DATA</span></div>
+    <div class="result-shell"><div id="empty-state" class="empty-state"><div class="empty-icon">{ }</div><strong>Your JSON appears here.</strong><p>The requested keys stay exactly as you entered them. Missing or uncertain answers are shown as <code>null</code>.</p></div>
+      <div id="busy-state" class="busy-state" hidden><div class="scan-line"></div><strong>Reading your form…</strong><p id="busy-detail">Preparing document pages</p></div>
+      <div id="error-state" class="error-state" role="alert" hidden></div>
+      <div id="results" hidden><div class="result-toolbar"><div><span class="result-label">RESULT / JSON</span><strong id="result-summary">0 fields</strong></div><div class="result-buttons"><button id="copy-json" type="button">Copy</button><button id="download-json" type="button">Download JSON</button></div></div><pre id="json-output"></pre><div class="result-note" id="result-note"></div></div>
+    </div>
+    <div id="inspection" class="inspection" hidden><div class="section-kicker"><span>INSPECTION</span><span>PAGE AND FIELD EVIDENCE</span></div><div class="inspection-body"><div class="page-preview"><img id="page-image" alt="Uploaded form page preview"><div class="preview-controls"><button id="prev-page" type="button" aria-label="Previous page">←</button><span id="page-label">PAGE 1</span><button id="next-page" type="button" aria-label="Next page">→</button></div></div><div id="field-list" class="field-list"></div></div></div>
+  </div></section>
+  <footer>FORM LAB <span>·</span> DYNAMIC EXTRACTION <span class="footer-right">CHECK UNCERTAIN VALUES BEFORE USE</span></footer>
+</main></div><script src="/static/dynamic.js?v=1" defer></script></body></html>

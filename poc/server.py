@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import binascii
+import hashlib
 import io
 import importlib.util
 import json
@@ -20,11 +21,12 @@ from PIL import Image, ImageOps, UnidentifiedImageError
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.responses import FileResponse, PlainTextResponse, Response
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from .alignment import AlignmentError
 from .bank_form import PRESETS, TEXT, CHOICES, export as export_bank
 from .core import DATA_DIR, DependencyError, MAX_PAGE_PIXELS, PIPELINES, ROOT, align, render_pdf, run_pipeline, templates, to_png
+from .dynamic_extract import extract as extract_dynamic, normalize_schema
 from .template_detect import detect_pages
 from .template_store import get_template, save_template, validate
 
@@ -87,6 +89,11 @@ class TemplateRequest(BaseModel):
     source_document_id: str | None = None
 
 
+class DynamicRequest(BaseModel):
+    document_id: str
+    field_schema: dict | list = Field(alias="schema")
+
+
 def check_source_document(source: str | None, template: dict):
     if source is None:
         return
@@ -125,6 +132,11 @@ def form_generator():
 @app.get("/templates/editor")
 def template_editor():
     return FileResponse(ROOT / "web" / "template.html")
+
+
+@app.get("/dynamic")
+def dynamic_page():
+    return FileResponse(ROOT / "web" / "dynamic.html", headers={"Cache-Control": "no-store"})
 
 
 @app.get("/style.css", include_in_schema=False)
@@ -315,6 +327,31 @@ def page_image(document_id: str, page: int):
     if not path.exists():
         raise HTTPException(404)
     return FileResponse(path, media_type="image/png")
+
+
+@app.post("/api/dynamic/extract")
+def dynamic_run(request: DynamicRequest):
+    directory = STORE / request.document_id
+    pdf_path = directory / "source.pdf"
+    if not valid_document_id(request.document_id) or not pdf_path.is_file():
+        raise HTTPException(404, "Uploaded PDF not found")
+    try:
+        if not normalize_schema(request.field_schema):
+            raise ValueError("Add at least one schema field")
+        images = [Image.open(path).convert("RGB") for path in sorted(
+            directory.glob("page-*.png"), key=lambda path: int(path.stem.split("-")[-1]))]
+        if not images:
+            raise ValueError("PDF has no rendered pages")
+        pdf_bytes = pdf_path.read_bytes()
+        return extract_dynamic(images, pdf_bytes, request.field_schema,
+                               cache_key=hashlib.sha256(pdf_bytes).hexdigest())
+    except DependencyError as exc:
+        raise HTTPException(503, str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(422, str(exc)) from exc
+    except Exception as exc:
+        logger.exception("Dynamic extraction failed for %s", request.document_id)
+        raise HTTPException(500, "Dynamic extraction failed. Check server logs.") from exc
 
 
 @app.post("/api/run")

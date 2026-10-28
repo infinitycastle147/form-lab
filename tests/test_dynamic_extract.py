@@ -122,3 +122,132 @@ def test_schema_edits_reuse_document_ocr(monkeypatch):
     assert second["values"] == {"reference": "REF-1042"}
     assert first["cache_hit"] is False and second["cache_hit"] is True
     assert calls == {"paddle": 1, "tesseract": 1}
+
+
+def test_unregistered_marked_choices_use_pixels_not_ocr_text(monkeypatch):
+    from PIL import Image, ImageDraw
+    import poc.dynamic_extract as dynamic
+    image = Image.new("RGB", (1000, 1400), "white")
+    draw = ImageDraw.Draw(image)
+    for y in (150, 190, 320, 360):
+        draw.rectangle((100, y, 122, y + 22), outline="black", width=2)
+    for y in (150, 320, 360):
+        draw.line([(103, y + 10), (110, y + 18), (124, y + 2)], fill="#182866", width=4)
+    lines = [{"text": text, "box": box} for text, box in [
+        ("Type of Application:", [90, 105, 290, 130]),
+        ("New Application", [140, 150, 300, 173]),
+        ("Renewal", [140, 190, 245, 213]),
+        ("Programs:", [90, 275, 220, 300]),
+        ("Art", [140, 320, 190, 343]),
+        ("Music", [140, 360, 210, 383]),
+    ]]
+    monkeypatch.setattr(dynamic, "prepare_page", lambda page: (page, []))
+    monkeypatch.setattr(dynamic, "_paddle_lines", lambda page: lines)
+    monkeypatch.setattr(dynamic, "_ocr_lines", lambda page: [])
+    result = extract([image], raw_schema={
+        "application_type": {"type": "choice", "aliases": ["Type of Application"],
+                             "allowed_values": ["New Application", "Renewal"]},
+        "programs": {"type": "array", "aliases": ["Programs"],
+                     "allowed_values": ["Art", "Music"]}})
+    assert result["values"] == {"application_type": "New Application", "programs": ["Art", "Music"]}
+    assert all(field["source"] == "omr" and not field["uncertain"] for field in result["fields"])
+
+
+def test_multiline_answer_stops_at_next_label(monkeypatch):
+    from PIL import Image
+    import poc.dynamic_extract as dynamic
+    lines = [{"text": text, "box": box} for text, box in [
+        ("Full Name:", [100, 100, 180, 125]),
+        ("Alex Taylor", [220, 100, 370, 130]),
+        ("Address:", [100, 140, 175, 165]),
+        ("12 Maple Grove", [220, 140, 370, 170]),
+        ("Riverton, LA 70821", [220, 170, 430, 200]),
+        ("Phone Number: 555-0198-427", [100, 205, 400, 230]),
+    ]]
+    monkeypatch.setattr(dynamic, "prepare_page", lambda page: (page, []))
+    monkeypatch.setattr(dynamic, "_paddle_lines", lambda page: lines)
+    monkeypatch.setattr(dynamic, "_ocr_lines", lambda page: [])
+    result = extract([Image.new("RGB", (1000, 1400), "white")], raw_schema={
+        "full_name": {"aliases": ["Full Name"]}, "address": {"aliases": ["Address"]}})
+    assert result["values"] == {"full_name": "Alex Taylor", "address": "12 Maple Grove Riverton, LA 70821"}
+
+
+def test_ruled_table_becomes_array_of_rows_with_ocr_overflow(monkeypatch):
+    from PIL import Image, ImageDraw
+    import poc.dynamic_extract as dynamic
+
+    image = Image.new("RGB", (1000, 1400), "white")
+    draw = ImageDraw.Draw(image)
+    for y in (400, 450, 500, 550):
+        draw.line((100, y, 900, y), fill="black", width=2)
+    for x in (100, 300, 500, 900):
+        draw.line((x, 400, x, 550), fill="black", width=2)
+    # A pen stroke or weak scan can erase one divider while the other columns survive.
+    draw.line((103, 450, 297, 450), fill="white", width=4)
+    lines = [{"text": text, "box": box} for text, box in [
+        ("Employment History", [100, 355, 370, 382]),
+        ("From", [120, 410, 220, 440]), ("To", [320, 410, 400, 440]),
+        ("Employer", [530, 410, 700, 440]),
+        ("06/2020", [120, 460, 270, 490]), ("08/2022", [320, 460, 470, 490]),
+        ("Riverton Mart", [530, 460, 725, 490]),
+        ("09/2022", [120, 510, 270, 540]), ("Present", [320, 510, 475, 540]),
+        ("BrightPath Co.", [530, 510, 905, 540]),
+    ]]
+    monkeypatch.setattr(dynamic, "prepare_page", lambda page: (page, []))
+    monkeypatch.setattr(dynamic, "_paddle_lines", lambda page: lines)
+    monkeypatch.setattr(dynamic, "_ocr_lines", lambda page: [])
+    result = extract([image], raw_schema={"jobs": {"type": "table", "aliases": ["Employment History"],
+        "columns": {"from_date": ["From"], "to_date": ["To"], "employer": ["Employer"]}}})
+    assert result["values"]["jobs"] == [
+        {"from_date": "06/2020", "to_date": "08/2022", "employer": "Riverton Mart"},
+        {"from_date": "09/2022", "to_date": "Present", "employer": "BrightPath Co."},
+    ]
+    assert result["fields"][0]["source"] == "table_ocr"
+    assert result["pages"][0]["tables"] == 1
+
+
+def test_table_schema_requires_columns():
+    with pytest.raises(ValueError, match="needs 2 to 20 columns"):
+        normalize_schema({"employment": {"type": "table"}})
+
+
+def test_array_of_objects_schema_maps_to_table_columns():
+    schema = normalize_schema({"jobs": {"type": "array", "aliases": ["Employment History"],
+        "items": {"type": "object", "properties": {
+            "from_date": {"aliases": ["From (MM/YYYY)"]},
+            "employer": {"aliases": ["Employer"]}}}}})
+    assert schema[0]["type"] == "table"
+    assert [column["key"] for column in schema[0]["columns"]] == ["from_date", "employer"]
+
+
+def test_blank_inputs_do_not_take_neighboring_labels_or_choices(monkeypatch):
+    from PIL import Image
+    import poc.dynamic_extract as dynamic
+    lines = [{"text": text, "box": box} for text, box in [
+        ("Ref No:", [100, 100, 170, 120]),
+        ("Date Received:", [100, 130, 230, 150]),
+        ("Processed By:", [100, 160, 210, 180]),
+        ("Date of Birth (DD/MM/YYYY):", [100, 205, 330, 225]),
+        ("14/06/1993", [340, 205, 460, 230]),
+        ("Other:", [100, 300, 165, 320]),
+        ("No Preference", [100, 330, 250, 350]),
+        ("Yes (please specify):", [100, 400, 260, 420]),
+        ("No", [100, 430, 135, 450]),
+    ]]
+    monkeypatch.setattr(dynamic, "prepare_page", lambda page: (page, []))
+    monkeypatch.setattr(dynamic, "_paddle_lines", lambda page: lines)
+    monkeypatch.setattr(dynamic, "_ocr_lines", lambda page: [])
+    result = extract([Image.new("RGB", (1000, 1400), "white")], raw_schema={
+        "office_reference": {"aliases": ["Ref No"]},
+        "office_date": {"aliases": ["Date Received"]},
+        "office_processed": {"aliases": ["Processed By"]},
+        "other_details": {"aliases": ["Other"]},
+        "preferred_schedule": {"type": "choice", "allowed_values": ["No Preference"]},
+        "requirements_details": {"aliases": ["Yes (please specify)"]},
+        "requirements": {"type": "boolean"},
+    })
+    assert result["values"]["office_reference"] is None
+    assert result["values"]["office_date"] is None
+    assert result["values"]["office_processed"] is None
+    assert result["values"]["other_details"] is None
+    assert result["values"]["requirements_details"] is None

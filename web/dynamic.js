@@ -3,6 +3,27 @@ let documentInfo = null;
 let result = null;
 let pageIndex = 0;
 let sequence = 0;
+const sampleSchema = {
+  full_name: {aliases: ['Full Name']},
+  date_of_birth: {type: 'date', aliases: ['Date of Birth']},
+  address: {aliases: ['Address']},
+  phone_number: {aliases: ['Phone Number']},
+  email_address: {aliases: ['Email Address']},
+  application_type: {type: 'choice', aliases: ['Type of Application'], allowed_values: ['New Application', 'Renewal', 'Update / Change', 'Other']},
+  purpose_of_application: {aliases: ['Purpose of Application']},
+  programs: {type: 'array', aliases: ['Which program(s) are you interested in?'], allowed_values: ['Art & Creativity', 'Health & Wellness', 'Computer Skills', 'Language Classes', 'Career Development', 'Other']},
+  preferred_schedule: {type: 'choice', aliases: ['Preferred Schedule'], allowed_values: ['Morning', 'Afternoon', 'Evening', 'No Preference']},
+  highest_level_completed: {type: 'choice', aliases: ['Highest Level Completed'], allowed_values: ['High School', 'Some College', 'Associate Degree', "Bachelor's Degree", "Master's Degree", 'Other']},
+  field_of_study: {aliases: ['Field of Study']},
+  reason_for_interest: {aliases: ['Why are you interested in this program?']},
+  special_requirements: {type: 'boolean', aliases: ['Do you have any special requirements or accommodations?']},
+  employment_history: {type: 'table', aliases: ['Employment History'], columns: {
+    from: ['From (MM/YYYY)'], to: ['To (MM/YYYY)'], position: ['Position / Job Title'],
+    employer: ['Employer'], responsibilities: ['Key Responsibilities (brief)']
+  }},
+  signature: {aliases: ['Signature']},
+  signature_date: {type: 'date', aliases: ['Date']}
+};
 
 function parseSchema() {
   try {
@@ -87,14 +108,17 @@ function showResult() {
   state('result');
   const entries = Object.entries(result.values);
   const uncertain = result.fields.filter(field => field.uncertain).length;
-  $('result-summary').textContent = `${entries.length} fields · ${uncertain} need review`;
+  const matched = result.fields.filter(field => field.source !== 'unmatched' && field.value !== null).length;
+  $('result-summary').textContent = `${matched} of ${entries.length} fields found · ${uncertain} need review`;
+  $('evidence-summary').textContent = `${entries.length} REQUESTED`;
   $('json-output').textContent = JSON.stringify(result.values, null, 2);
   const notes = [];
   if (result.timing) notes.push(result.cache_hit ? `Reused OCR from this upload; extraction ${Math.round(result.timing.total_ms)} ms.` : `First extraction ${Math.round(result.timing.total_ms / 1000)} s; schema edits reuse OCR.`);
   const paddleLines = result.pages.reduce((sum, page) => sum + (page.paddle_lines || 0), 0);
   const tesseractLines = result.pages.reduce((sum, page) => sum + (page.tesseract_lines || 0), 0);
   if (entries.every(([, value]) => value === null)) notes.push(`No requested fields matched. OCR found ${paddleLines} Paddle lines and ${tesseractLines} Tesseract lines. Check the schema labels and add aliases matching the printed questions.`);
-  if (result.method === 'paddle_ocr') notes.push('Local PaddleOCR read the page. Add schema aliases when form wording differs; review handwriting and uncertain matches.');
+  if (result.fields.some(field => field.source === 'omr')) notes.push('OpenCV read marked choices from the page image. Review any conflicting or faint marks.');
+  if (result.method === 'paddle_ocr') notes.push('Local PaddleOCR read labels and handwriting. Review uncertain text before using it.');
   if (result.method === 'tesseract_ocr') notes.push('Tesseract OCR read the page. PaddleOCR was unavailable or missed the requested labels; review uncertain matches.');
   for (const page of result.pages) if (page.corrections.length) notes.push(`Page ${page.number}: ${page.corrections.join(', ').replaceAll('_', ' ')}.`);
   notes.push(...result.method_errors);
@@ -102,16 +126,42 @@ function showResult() {
   const list = $('field-list');
   list.replaceChildren();
   for (const field of result.fields) {
-    const item = document.createElement('div'); item.className = 'field-item';
+    const item = document.createElement('button'); item.className = 'field-item'; item.type = 'button';
     const head = document.createElement('div'); head.className = 'field-head';
     const key = document.createElement('strong'); key.textContent = field.key;
-    const badge = document.createElement('span'); badge.className = field.uncertain ? 'uncertain' : '';
-    badge.textContent = field.uncertain ? 'REVIEW' : `PAGE ${field.page}`;
+    const badge = document.createElement('span'); badge.className = field.uncertain ? 'uncertain' : 'verified';
+    badge.textContent = field.source === 'unmatched' ? 'NOT FOUND' : field.uncertain ? 'REVIEW' : 'MARK READ';
     head.append(key, badge);
-    const value = document.createElement('p'); value.textContent = field.value === null ? 'null' : String(field.value);
-    const question = document.createElement('small'); question.textContent = field.question ? `Matched: ${field.question} · ${field.source}` : `No matching question · ${field.source}`;
-    item.append(head, value, question);
-    item.addEventListener('click', () => { if (field.page) { pageIndex = field.page - 1; updatePage(); } });
+    const value = document.createElement('p');
+    value.className = field.value === null ? 'missing-value' : 'field-value';
+    const isTable = Array.isArray(field.value) && field.value.some(row => row && typeof row === 'object' && !Array.isArray(row));
+    value.textContent = field.value === null ? 'No reliable value' : isTable ? `${field.value.length} ${field.value.length === 1 ? 'row' : 'rows'} extracted` : Array.isArray(field.value) ? field.value.length ? field.value.join(' · ') : 'None selected' : String(field.value);
+    const question = document.createElement('small'); question.textContent = field.question ? `MATCHED LABEL  ${field.question}` : 'NO MATCHING LABEL';
+    const source = document.createElement('small'); source.className = 'field-source'; source.textContent = `PAGE ${field.page || '—'}  ·  ${field.source.replaceAll('_', ' ').toUpperCase()}`;
+    item.append(head, value, question, source);
+    if (isTable) {
+      const table = document.createElement('div'); table.className = 'field-table';
+      for (const [index, row] of field.value.entries()) {
+        const heading = document.createElement('strong'); heading.textContent = `ROW ${index + 1}`; table.append(heading);
+        for (const [column, text] of Object.entries(row)) {
+          const cell = document.createElement('div');
+          const name = document.createElement('span'); name.textContent = column.replaceAll('_', ' ');
+          const content = document.createElement('span'); content.textContent = text ?? 'Not read';
+          cell.append(name, content); table.append(cell);
+        }
+      }
+      item.append(table);
+    }
+    if (field.options?.length) {
+      const choices = document.createElement('div'); choices.className = 'field-options';
+      for (const option of field.options) {
+        const chip = document.createElement('span'); chip.className = option.selected ? 'selected' : '';
+        chip.textContent = `${option.selected ? '✓' : '○'} ${option.value}`;
+        choices.append(chip);
+      }
+      item.append(choices);
+    }
+    item.addEventListener('click', () => { if (field.page) focusField(field, item); });
     list.append(item);
   }
   pageIndex = 0;
@@ -121,14 +171,40 @@ function showResult() {
 
 function updatePage() {
   if (!documentInfo) return;
-  $('page-image').src = documentInfo.pages[pageIndex];
+  const preview = result?.pages[pageIndex]?.preview || documentInfo.pages[pageIndex];
+  $('page-image').src = preview;
+  $('full-page').href = preview;
   $('page-label').textContent = `PAGE ${pageIndex + 1} / ${documentInfo.page_count}`;
   $('prev-page').disabled = pageIndex === 0;
   $('next-page').disabled = pageIndex >= documentInfo.page_count - 1;
+  $('field-overlay').hidden = true;
+  document.querySelector('.preview-image').scrollTop = 0;
   for (const item of $('field-list').children) item.classList.remove('active');
 }
 
+function focusField(field, item) {
+  pageIndex = field.page - 1;
+  updatePage();
+  item.classList.add('active');
+  const size = result?.pages[pageIndex]?.size;
+  if (!field.box || !size) return;
+  const [x1, y1, x2, y2] = field.box;
+  const overlay = $('field-overlay');
+  overlay.style.left = `${100 * x1 / size[0]}%`;
+  overlay.style.top = `${100 * y1 / size[1]}%`;
+  overlay.style.width = `${100 * (x2 - x1) / size[0]}%`;
+  overlay.style.height = `${100 * (y2 - y1) / size[1]}%`;
+  overlay.hidden = false;
+  const scrollToSource = () => {
+    const preview = document.querySelector('.preview-image');
+    preview.scrollTop = overlay.offsetTop - preview.clientHeight / 2 + overlay.offsetHeight / 2;
+  };
+  if ($('page-image').complete) scrollToSource();
+  else $('page-image').addEventListener('load', scrollToSource, {once: true});
+}
+
 $('schema-input').addEventListener('input', () => { parseSchema(); if (documentInfo) $('run-hint').textContent = 'Schema changed. Run extraction to refresh the result.'; });
+$('sample-schema').addEventListener('click', () => { $('schema-input').value = JSON.stringify(sampleSchema, null, 2); parseSchema(); $('run-hint').textContent = documentInfo ? 'Sample schema loaded. Run extraction to refresh the result.' : 'Sample schema loaded. Upload the PDF to start.'; });
 $('pdf-file').addEventListener('change', event => uploadFile(event.target.files[0]));
 const drop = $('pdf-drop');
 drop.addEventListener('dragover', event => {event.preventDefault(); drop.classList.add('dragover');});

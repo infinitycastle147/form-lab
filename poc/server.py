@@ -26,11 +26,13 @@ from pydantic import BaseModel, Field
 from .alignment import AlignmentError
 from .bank_form import PRESETS, TEXT, CHOICES, export as export_bank
 from .core import DATA_DIR, DependencyError, MAX_PAGE_PIXELS, PIPELINES, ROOT, align, render_pdf, run_pipeline, templates, to_png
-from .dynamic_extract import extract as extract_dynamic, normalize_schema
+from .dynamic_extract import extract as extract_dynamic, normalize_schema, prepare_page
+from .docling_route import router as docling_router
 from .template_detect import detect_pages
 from .template_store import get_template, save_template, validate
 
 app = FastAPI(title="Form Lab")
+app.include_router(docling_router)
 logger = logging.getLogger(__name__)
 STORE = DATA_DIR
 STORE.mkdir(parents=True, exist_ok=True)
@@ -137,6 +139,11 @@ def template_editor():
 @app.get("/dynamic")
 def dynamic_page():
     return FileResponse(ROOT / "web" / "dynamic.html", headers={"Cache-Control": "no-store"})
+
+
+@app.get("/docling")
+def docling_page():
+    return FileResponse(ROOT / "web" / "docling.html", headers={"Cache-Control": "no-store"})
 
 
 @app.get("/style.css", include_in_schema=False)
@@ -329,6 +336,16 @@ def page_image(document_id: str, page: int):
     return FileResponse(path, media_type="image/png")
 
 
+@app.get("/api/documents/{document_id}/pages/{page}/corrected")
+def corrected_page_image(document_id: str, page: int):
+    if not valid_document_id(document_id) or page < 1 or page > 20:
+        raise HTTPException(404)
+    path = STORE / document_id / f"corrected-page-{page}.png"
+    if not path.exists():
+        raise HTTPException(404)
+    return FileResponse(path, media_type="image/png")
+
+
 @app.post("/api/dynamic/extract")
 def dynamic_run(request: DynamicRequest):
     directory = STORE / request.document_id
@@ -343,8 +360,18 @@ def dynamic_run(request: DynamicRequest):
         if not images:
             raise ValueError("PDF has no rendered pages")
         pdf_bytes = pdf_path.read_bytes()
-        return extract_dynamic(images, pdf_bytes, request.field_schema,
-                               cache_key=hashlib.sha256(pdf_bytes).hexdigest())
+        result = extract_dynamic(images, pdf_bytes, request.field_schema,
+                                 cache_key=hashlib.sha256(pdf_bytes).hexdigest())
+        for index, page in enumerate(result["pages"], 1):
+            if page["corrections"]:
+                corrected_path = directory / f"corrected-page-{index}.png"
+                if not corrected_path.is_file():
+                    corrected, _ = prepare_page(images[index - 1])
+                    corrected.save(corrected_path)
+                page["preview"] = f"/api/documents/{request.document_id}/pages/{index}/corrected"
+            else:
+                page["preview"] = f"/api/documents/{request.document_id}/pages/{index}"
+        return result
     except DependencyError as exc:
         raise HTTPException(503, str(exc)) from exc
     except ValueError as exc:

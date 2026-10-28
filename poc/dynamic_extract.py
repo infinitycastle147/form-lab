@@ -12,6 +12,7 @@ import tempfile
 import threading
 import time
 from collections import OrderedDict
+from difflib import SequenceMatcher
 from pathlib import Path
 
 from PIL import Image
@@ -48,7 +49,7 @@ def normalize_schema(raw):
         if not isinstance(description, dict):
             raise ValueError(f"Schema definition for {key} must be an object or description string")
         kind = description.get("type", "string")
-        if kind not in ("string", "date", "number", "boolean", "choice"):
+        if kind not in ("string", "date", "number", "boolean", "choice", "array", "table"):
             raise ValueError(f"Unsupported type for {key}")
         aliases = description.get("aliases", [])
         options = description.get("allowed_values", [])
@@ -56,9 +57,31 @@ def normalize_schema(raw):
             raise ValueError(f"Aliases for {key} must be a string list")
         if not isinstance(options, list) or not all(isinstance(x, (str, int, float, bool)) for x in options):
             raise ValueError(f"Allowed values for {key} must be a scalar list")
+        columns = description.get("columns", {})
+        # A JSON-Schema-style array of objects represents repeated table rows.
+        items = description.get("items")
+        if kind == "array" and isinstance(items, dict) and items.get("type") == "object":
+            columns = items.get("properties", {})
+            kind = "table"
+        if kind == "table":
+            if not isinstance(columns, dict) or not 2 <= len(columns) <= 20:
+                raise ValueError(f"Table {key} needs 2 to 20 columns")
+            parsed_columns = []
+            for column_key, column in columns.items():
+                if not isinstance(column_key, str) or not re.fullmatch(r"[A-Za-z][A-Za-z0-9_]{0,63}", column_key):
+                    raise ValueError(f"Invalid column key in {key}")
+                names = column.get("aliases", []) if isinstance(column, dict) else column
+                if isinstance(names, str):
+                    names = [names]
+                if not isinstance(names, list) or not all(isinstance(name, str) for name in names):
+                    raise ValueError(f"Column {column_key} in {key} needs label aliases")
+                parsed_columns.append({"key": column_key, "names": [column_key.replace("_", " "),
+                                                                  *[name[:100] for name in names[:10]]]})
+        else:
+            parsed_columns = []
         fields.append({"key": key, "description": str(description.get("description", ""))[:300],
                        "type": kind, "aliases": [alias[:100] for alias in aliases[:15]],
-                       "allowed_values": options[:50]})
+                       "allowed_values": options[:50], "columns": parsed_columns})
     return fields
 
 
@@ -234,6 +257,269 @@ def _paddle_lines(image):
     return sorted(lines, key=lambda line: (line["box"][1], line["box"][0]))
 
 
+def _detect_marks(image):
+    """Find small printed selection controls and measure ink inside their borders."""
+    import cv2
+    import numpy as np
+
+    gray = cv2.cvtColor(np.asarray(image.convert("RGB")), cv2.COLOR_RGB2GRAY)
+    binary = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                                   cv2.THRESH_BINARY_INV, 31, 12)
+    contours, _ = cv2.findContours(binary, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    minimum = max(11, round(image.width * .009))
+    maximum = max(32, round(image.width * .034))
+    boxes = []
+    for contour in contours:
+        x, y, width, height = cv2.boundingRect(contour)
+        if not (minimum <= width <= maximum and minimum <= height <= maximum
+                and .7 <= width / height <= 1.4 and
+                cv2.contourArea(contour) >= width * height * .25):
+            continue
+        box = [x, y, x + width, y + height]
+        # RETR_LIST reports the inside and outside of the same printed control.
+        if any(abs((box[0] + box[2]) - (old["box"][0] + old["box"][2])) < 12
+               and abs((box[1] + box[3]) - (old["box"][1] + old["box"][3])) < 12 for old in boxes):
+            continue
+        inset = max(3, round(min(width, height) * .24))
+        inside = gray[y + inset:y + height - inset, x + inset:x + width - inset]
+        if not inside.size:
+            continue
+        surround = gray[max(0, y - 3):min(gray.shape[0], y + height + 3),
+                        max(0, x - 3):min(gray.shape[1], x + width + 3)]
+        dark_threshold = min(150, max(80, float(np.percentile(surround, 75)) - 35))
+        boxes.append({"box": box, "ink_ratio": round(float((inside < dark_threshold).mean()), 3)})
+    return boxes
+
+
+def _detect_tables(image):
+    """Find ruled cell grids on a scan; geometry only, with no OCR or schema coupling."""
+    import cv2
+    import numpy as np
+
+    gray = cv2.cvtColor(np.asarray(image.convert("RGB")), cv2.COLOR_RGB2GRAY)
+    height, width = gray.shape
+    ink = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                                cv2.THRESH_BINARY_INV, 31, 12)
+    horizontal = cv2.morphologyEx(ink, cv2.MORPH_OPEN,
+                                 cv2.getStructuringElement(cv2.MORPH_RECT, (max(24, width // 28), 1)))
+    vertical = cv2.morphologyEx(ink, cv2.MORPH_OPEN,
+                               cv2.getStructuringElement(cv2.MORPH_RECT, (1, max(18, height // 70))))
+    grid = cv2.morphologyEx(cv2.bitwise_or(horizontal, vertical), cv2.MORPH_CLOSE,
+                            cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5)))
+    contours, _ = cv2.findContours(grid, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    cells = []
+    for contour in contours:
+        x, y, cell_width, cell_height = cv2.boundingRect(contour)
+        if not (width * .055 <= cell_width <= width * .55 and
+                height * .012 <= cell_height <= height * .12 and
+                cv2.contourArea(contour) >= cell_width * cell_height * .68):
+            continue
+        box = [x, y, x + cell_width, y + cell_height]
+        if any(_box_iou(box, other) > .82 for other in cells):
+            continue
+        cells.append(box)
+    rows = []
+    for cell in sorted(cells, key=lambda box: ((box[1] + box[3]) / 2, box[0])):
+        center = (cell[1] + cell[3]) / 2
+        row = next((row for row in rows if abs(center - row["center"]) <=
+                    max(12, min(cell[3] - cell[1], row["height"]) * .42)), None)
+        if row is None:
+            rows.append({"center": center, "height": cell[3] - cell[1], "cells": [cell]})
+        else:
+            row["cells"].append(cell)
+            row["center"] = sum((box[1] + box[3]) / 2 for box in row["cells"]) / len(row["cells"])
+    cleaned_rows = []
+    for row in rows:
+        heights = sorted(box[3] - box[1] for box in row["cells"])
+        median_height = heights[len(heights) // 2]
+        cells_in_row = [box for box in row["cells"] if box[3] - box[1] <= median_height * 1.55]
+        if len(cells_in_row) >= 2:
+            cleaned_rows.append(sorted(cells_in_row, key=lambda box: box[0]))
+    rows = cleaned_rows
+    tables = []
+    current = []
+    for row in sorted(rows, key=lambda group: min(box[1] for box in group)):
+        aligned = current and sum(any(abs(a[0] - b[0]) <= width * .035 and
+                                      abs(a[2] - b[2]) <= width * .035 for b in current[-1])
+                                  for a in row) >= max(2, min(len(row), len(current[-1])) - 1)
+        adjacent = current and min(box[1] for box in row) - max(box[3] for box in current[-1]) <= height * .018
+        if current and not (aligned and adjacent):
+            if len(current) >= 2:
+                tables.append(_table_grid(current))
+            current = []
+        current.append(row)
+    if len(current) >= 2:
+        tables.append(_table_grid(current))
+    return tables
+
+
+def _box_iou(first, second):
+    intersection = max(0, min(first[2], second[2]) - max(first[0], second[0])) * \
+                   max(0, min(first[3], second[3]) - max(first[1], second[1]))
+    area_a = (first[2] - first[0]) * (first[3] - first[1])
+    area_b = (second[2] - second[0]) * (second[3] - second[1])
+    return intersection / max(1, area_a + area_b - intersection)
+
+
+def _table_grid(rows):
+    reference = max(rows, key=len)
+    tolerance = max(12, (reference[-1][2] - reference[0][0]) * .025)
+    completed = []
+    for row in rows:
+        top, bottom = min(cell[1] for cell in row), max(cell[3] for cell in row)
+        completed.append([next((cell for cell in row if abs(cell[0] - example[0]) <= tolerance and
+                               abs(cell[2] - example[2]) <= tolerance),
+                               [example[0], top, example[2], bottom]) for example in reference])
+    rows = completed
+    return {"rows": rows, "box": [min(cell[0] for row in rows for cell in row),
+                                    min(cell[1] for row in rows for cell in row),
+                                    max(cell[2] for row in rows for cell in row),
+                                    max(cell[3] for row in rows for cell in row)]}
+
+
+def _table_candidates(lines, tables, page_number, schema):
+    """Map page OCR to detected cells, then map the header to requested columns."""
+    candidates = []
+    for spec in schema:
+        if spec["type"] != "table":
+            continue
+        names = [spec["key"].replace("_", " "), *spec["aliases"]]
+        if spec["description"]:
+            names.append(spec["description"])
+        ranked = []
+        for table in tables:
+            row_count, col_count = len(table["rows"]), len(table["rows"][0])
+            if row_count < 2 or col_count != len(spec["columns"]):
+                continue
+            heading = next((line for line in reversed(lines) if
+                            0 <= table["box"][1] - line["box"][3] <= 120 and
+                            any(_name_score(line["text"], name) >= .72 for name in names)), None)
+            cell_lines = [[[] for _ in row] for row in table["rows"]]
+            ambiguous = False
+            for line in lines:
+                box = line["box"]
+                if box[2] < table["box"][0] or box[0] > table["box"][2] or \
+                        box[3] < table["box"][1] or box[1] > table["box"][3]:
+                    continue
+                # A small margin retains handwriting that extends over a printed rule.
+                overlaps = []
+                for row_index, row in enumerate(table["rows"]):
+                    for col_index, cell in enumerate(row):
+                        intersection = max(0, min(box[2], cell[2] + 6) - max(box[0], cell[0] - 6)) * \
+                                       max(0, min(box[3], cell[3] + 6) - max(box[1], cell[1] - 6))
+                        if intersection:
+                            overlaps.append((intersection, row_index, col_index))
+                if not overlaps:
+                    continue
+                overlaps.sort(reverse=True)
+                if len(overlaps) > 1 and overlaps[1][0] >= overlaps[0][0] * .72:
+                    ambiguous = True
+                    continue
+                _, row_index, col_index = overlaps[0]
+                cell_lines[row_index][col_index].append(line)
+            text_grid = [[" ".join(line["text"] for line in sorted(group,
+                          key=lambda item: (item["box"][1], item["box"][0])))
+                          for group in row] for row in cell_lines]
+            header = text_grid[0]
+            column_map, header_score = _table_column_map(header, spec["columns"])
+            # A visible heading or strongly recognized headers must identify the table.
+            if heading is None and header_score < .65:
+                continue
+            rows = []
+            for row_index in range(1, row_count):
+                values = {column["key"]: text_grid[row_index][column_map[index]].strip() or None
+                          for index, column in enumerate(spec["columns"])}
+                if any(value is not None for value in values.values()):
+                    rows.append(values)
+            ranked.append((int(heading is not None) + header_score, {
+                "key": spec["key"], "value": rows or None,
+                "question": heading["text"] if heading else " / ".join(header),
+                "page": page_number, "box": table["box"], "uncertain": True,
+                "source": "table_ocr", "headers": header, "cell_boxes": table["rows"]}))
+        if ranked:
+            candidates.append(max(ranked, key=lambda item: item[0])[1])
+    return candidates
+
+
+def _name_score(text, name):
+    words = set(re.findall(r"[a-z0-9]+", name.lower()))
+    actual = set(re.findall(r"[a-z0-9]+", text.lower()))
+    if not words:
+        return 0.0
+    return max(len(words & actual) / len(words), SequenceMatcher(None, _slug(name), _slug(text)).ratio())
+
+
+def _table_column_map(header, columns):
+    scores = [[max(_name_score(text, name) for name in column["names"]) for text in header]
+              for column in columns]
+    remaining = set(range(len(header)))
+    mapping = {}
+    for column_index in sorted(range(len(columns)), key=lambda index: max(scores[index]), reverse=True):
+        cell_index = max(remaining, key=lambda index: scores[column_index][index])
+        mapping[column_index] = cell_index
+        remaining.remove(cell_index)
+    score = sum(scores[index][mapping[index]] for index in mapping) / len(columns)
+    # If OCR mangles the header, its printed order remains useful but uncertain.
+    if score < .65:
+        return list(range(len(columns))), score
+    return [mapping[index] for index in range(len(columns))], score
+
+
+def _selection_candidates(lines, marks, page_number, schema):
+    """Associate OCR option labels with nearby visual controls and schema headings."""
+    candidates = []
+    for spec in schema:
+        if spec["type"] not in ("boolean", "choice", "array", "string"):
+            continue
+        names = [spec["key"].replace("_", " "), *spec["aliases"]]
+        if spec["description"]:
+            names.append(spec["description"])
+        headings = [line for line in lines if any(_label_answer(line["text"], name) is not None
+                                              for name in names if len(name.strip()) >= 2)]
+        if not headings:
+            continue
+        heading = min(headings, key=lambda line: line["box"][1])
+        options = spec["allowed_values"] or (["Yes", "No"] if spec["type"] == "boolean" or
+                                              spec["type"] == "string" and "?" in heading["text"] else [])
+        if not options:
+            continue
+        found = []
+        for option in options:
+            label = str(option)
+            option_pattern = re.compile(r"(?:^|_)" + re.escape(_slug(label)) + r"(?:_|$)")
+            matching = [line for line in lines if option_pattern.search(_slug(line["text"]))
+                        and 0 <= line["box"][1] - heading["box"][1] <=
+                        (110 if spec["type"] == "string" else 190)]
+            for line in matching:
+                x1, y1, _, y2 = line["box"]
+                nearby = [mark for mark in marks
+                          if abs((mark["box"][1] + mark["box"][3] - y1 - y2) / 2) <= 20
+                          and -45 <= x1 - mark["box"][2] <= 60]
+                if nearby:
+                    mark = min(nearby, key=lambda item: (item["box"][0],
+                               abs((item["box"][1] + item["box"][3] - y1 - y2) / 2)))
+                    found.append({"value": option, "label": line["text"], "box": mark["box"],
+                                  "ink_ratio": mark["ink_ratio"],
+                                  "selected": mark["ink_ratio"] >= .12,
+                                  "ambiguous": .05 <= mark["ink_ratio"] < .12})
+                    break
+        if not found or spec["type"] == "string" and len(found) < 2:
+            continue
+        selected = [option for option in found if option["selected"]]
+        if spec["type"] == "array":
+            value = [option["value"] for option in selected]
+        elif spec["type"] == "boolean":
+            value = selected[0]["value"] if len(selected) == 1 else None
+        else:
+            value = selected[0]["value"] if len(selected) == 1 else None
+        candidates.append({"key": spec["key"], "value": value, "question": heading["text"],
+                           "page": page_number, "box": selected[0]["box"] if selected else heading["box"],
+                           "options": found, "uncertain": len(found) < len(options) or
+                           any(option["ambiguous"] for option in found) or
+                           (spec["type"] != "array" and len(selected) != 1), "source": "omr"})
+    return candidates
+
+
 def _label_answer(text, name):
     """Find a label near the start of a recognized line, preserving any inline answer."""
     label = name.strip().replace("_", " ")
@@ -258,7 +544,7 @@ def _local_candidates(image, page_number, schema=None, lines=None, source="tesse
     """Conservative printed label/value pairs; uncertain handwriting needs review."""
     lines = _ocr_lines(image) if lines is None else lines
     candidates = []
-    for index, line in enumerate(lines):
+    for index, line in enumerate(lines if not schema else []):
         text = line["text"].strip()
         match = re.match(r"^(.{2,70}?)\s*[:：]\s*(\S.{0,200})$", text)
         if match:
@@ -280,6 +566,8 @@ def _local_candidates(image, page_number, schema=None, lines=None, source="tesse
                                    "uncertain": True, "source": source})
     if schema:
         for spec in schema:
+            if spec["type"] == "table":
+                continue
             names = [spec["key"].replace("_", " "), *spec["aliases"]]
             if spec["description"]:
                 names.append(spec["description"])
@@ -291,17 +579,28 @@ def _local_candidates(image, page_number, schema=None, lines=None, source="tesse
                     text = line["text"].strip()
                     answer = _label_answer(text, name)
                     if answer is not None:
-                        match_line = (line, answer)
-                        break
+                        # An exact label is safer than a short alias contained in
+                        # another question (for example Date vs Date Received).
+                        exact = bool(re.match(r"^\s*" + re.escape(name).replace(r"\ ", r"\s+")
+                                              + r"\s*[:：?]", text, re.I))
+                        rank = (0 if exact else 1, line["box"][1])
+                        if match_line is None or rank < match_line[0]:
+                            match_line = (rank, line, answer)
                 if not match_line:
                     continue
-                label_line, inline = match_line
+                _, label_line, inline = match_line
                 chosen = None
                 if inline and not inline.endswith((":", "?")):
                     chosen = {"text": inline, "box": label_line["box"]}
                 else:
                     x1, y1, x2, y2 = label_line["box"]
                     nearby = [line for line in lines if line is not label_line and
+                              not _is_printed_prompt_or_option(line["text"], schema) and
+                              not any(other is not label_line and other is not line and
+                                      y2 < other["box"][1] <= line["box"][1] + 2 and
+                                      other["box"][0] <= line["box"][0] and
+                                      _is_printed_prompt_or_option(other["text"], schema)
+                                      for other in lines) and
                               ((abs((line["box"][1] + line["box"][3]) / 2 - (y1 + y2) / 2) < max(18, image.height * .015)
                                 and line["box"][0] >= x2 - 5 and line["box"][0] - x2 < image.width * .42)
                                or (0 <= line["box"][1] - y2 < max(45, image.height * .035)
@@ -309,11 +608,47 @@ def _local_candidates(image, page_number, schema=None, lines=None, source="tesse
                     if nearby:
                         chosen = min(nearby, key=lambda line: (abs(line["box"][1] - y1), abs(line["box"][0] - x2)))
                 if chosen:
-                    candidates.append({"key": spec["key"], "value": chosen["text"], "question": name,
-                                       "page": page_number, "box": chosen["box"], "uncertain": True,
+                    value_lines = [chosen["text"]]
+                    last = chosen
+                    for following in lines:
+                        if following is chosen or following is label_line:
+                            continue
+                        gap = following["box"][1] - last["box"][3]
+                        other_label = following["text"].rstrip().endswith((":", "?")) or bool(
+                            re.match(r"^[^:：]{2,45}[:：]", following["text"]))
+                        intervening_label = any(line is not following and line is not label_line
+                            and last["box"][1] < line["box"][1] <= following["box"][1] + 2
+                            and line["box"][0] <= chosen["box"][0]
+                            and (line["text"].rstrip().endswith((":", "?")) or
+                                 re.match(r"^[^:：]{2,45}[:：]", line["text"])) for line in lines)
+                        if not other_label and not intervening_label and -5 <= gap <= max(18, image.height * .012) and \
+                                abs(following["box"][0] - chosen["box"][0]) <= max(32, image.width * .035) and \
+                                following["box"][0] < chosen["box"][2] and \
+                                not re.match(r"^\s*\d+[.]\s+[A-Z]", following["text"]):
+                            value_lines.append(following["text"])
+                            last = following
+                            if len(value_lines) >= 3:
+                                break
+                    value = " ".join(value_lines)
+                    candidates.append({"key": spec["key"], "value": value, "question": name,
+                                       "page": page_number, "box": [chosen["box"][0], chosen["box"][1],
+                                       max(chosen["box"][2], last["box"][2]), last["box"][3]], "uncertain": True,
                                        "source": source})
                     break
     return candidates
+
+
+def _is_printed_prompt_or_option(text, schema):
+    """A neighboring question or choice is not an answer to an empty input."""
+    stripped = text.strip()
+    if not stripped or stripped.endswith((":", "?")):
+        return True
+    normalized = _slug(stripped)
+    for spec in schema:
+        options = spec["allowed_values"] or (["Yes", "No"] if spec["type"] == "boolean" else [])
+        if any(normalized == _slug(str(option)) for option in options):
+            return True
+    return False
 
 
 def _match(field, spec):
@@ -328,6 +663,14 @@ def _match(field, spec):
 def _typed_value(value, spec):
     if value is None:
         return None
+    if spec["type"] == "table":
+        return value if isinstance(value, list) else None
+    if spec["type"] == "array":
+        if not isinstance(value, list):
+            return None
+        allowed = spec["allowed_values"]
+        return [next((option for option in allowed if str(option).casefold() == str(item).casefold()), item)
+                for item in value]
     text = str(value).strip()
     if not text:
         return None
@@ -378,9 +721,11 @@ def _remember_document(key, document):
 
 def _read_document(images, pdf_bytes, schema):
     widgets = _pdf_widgets(pdf_bytes)
-    if schema and all(any(_match(widget, spec) for widget in widgets) for spec in schema):
+    if schema and not any(spec["type"] == "table" for spec in schema) and \
+            all(any(_match(widget, spec) for widget in widgets) for spec in schema):
         return {"widgets": widgets, "pages": [
-            {"size": image.size, "corrections": [], "paddle": [], "tesseract": []} for image in images],
+            {"size": image.size, "corrections": [], "paddle": [], "tesseract": [], "marks": [], "tables": []}
+            for image in images],
             "errors": [], "widget_only": True}
     paddle_available = importlib.util.find_spec("paddleocr") is not None and importlib.util.find_spec("paddle") is not None
     tesseract_available = shutil.which("tesseract") is not None
@@ -389,6 +734,8 @@ def _read_document(images, pdf_bytes, schema):
     pages, errors = [], []
     for page_number, original in enumerate(images, 1):
         image, corrections = prepare_page(original)
+        marks = _detect_marks(image)
+        tables = _detect_tables(image)
         paddle_lines, tesseract_lines = [], []
         if paddle_available:
             try:
@@ -401,7 +748,8 @@ def _read_document(images, pdf_bytes, schema):
             except Exception as exc:
                 errors.append(f"Page {page_number}: Tesseract unavailable ({type(exc).__name__})")
         pages.append({"size": image.size, "corrections": corrections,
-                      "paddle": paddle_lines, "tesseract": tesseract_lines})
+                      "paddle": paddle_lines, "tesseract": tesseract_lines,
+                      "marks": marks, "tables": tables})
     return {"widgets": widgets, "pages": pages, "errors": errors, "widget_only": False}
 
 
@@ -426,6 +774,10 @@ def extract(images, pdf_bytes=None, raw_schema=None, cache_key=None):
     page_stats = []
     for page_number, page in enumerate(document["pages"], 1):
         image = Image.new("RGB", tuple(page["size"]))
+        candidates.extend(_table_candidates(page["paddle"] or page["tesseract"],
+                                           page.get("tables", []), page_number, schema))
+        candidates.extend(_selection_candidates(page["paddle"] or page["tesseract"],
+                                              page.get("marks", []), page_number, schema))
         page_candidates = _local_candidates(image, page_number, schema, page["paddle"], "paddle_ocr") if page["paddle"] else []
         used_paddle |= bool(page["paddle"])
         candidates.extend(page_candidates)
@@ -433,14 +785,31 @@ def extract(images, pdf_bytes=None, raw_schema=None, cache_key=None):
         if page["tesseract"] and (not page_candidates or missing):
             candidates.extend(_local_candidates(image, page_number, missing or schema, page["tesseract"]))
             used_tesseract = True
-        page_stats.append({"number": page_number, "corrections": page["corrections"],
-                           "paddle_lines": len(page["paddle"]), "tesseract_lines": len(page["tesseract"])})
+        page_stats.append({"number": page_number, "size": page["size"], "corrections": page["corrections"],
+                           "paddle_lines": len(page["paddle"]), "tesseract_lines": len(page["tesseract"]),
+                           "tables": len(page.get("tables", []))})
     if schema:
         values, evidence = {}, []
         for spec in schema:
             matches = [field for field in candidates if _match(field, spec)]
+            if spec["type"] == "table":
+                tables_found = sorted((field for field in matches if field["source"] == "table_ocr"),
+                                      key=lambda field: field["page"])
+                rows = [row for field in tables_found for row in (field["value"] or [])]
+                chosen = tables_found[0] if tables_found else None
+                value = rows or None
+                values[spec["key"]] = value
+                evidence.append({"key": spec["key"], "value": value,
+                                 "question": chosen["question"] if chosen else "",
+                                 "page": chosen["page"] if chosen else None,
+                                 "box": chosen["box"] if chosen else None,
+                                 "uncertain": True, "source": chosen["source"] if chosen else "unmatched",
+                                 "options": [], "cell_boxes": chosen.get("cell_boxes", []) if chosen else []})
+                continue
+            if any(field["source"] == "omr" for field in matches):
+                matches = [field for field in matches if field["source"] == "omr"]
             matches.sort(key=lambda field: (field.get("value") is not None, field["source"] == "pdf_widget",
-                                            field["source"] == "paddle_ocr"), reverse=True)
+                                            field["source"] == "omr", field["source"] == "paddle_ocr"), reverse=True)
             chosen = matches[0] if matches else None
             conflict = len({str(field["value"]) for field in matches if field["value"] is not None}) > 1
             value = _typed_value(chosen.get("value"), spec) if chosen and not conflict else None
@@ -448,7 +817,9 @@ def extract(images, pdf_bytes=None, raw_schema=None, cache_key=None):
             evidence.append({"key": spec["key"], "value": value, "question": chosen["question"] if chosen else "",
                              "page": chosen["page"] if chosen else None, "box": chosen["box"] if chosen else None,
                              "uncertain": not chosen or chosen["uncertain"] or conflict or value is None,
-                             "source": chosen["source"] if chosen else "unmatched"})
+                             "source": chosen["source"] if chosen else "unmatched",
+                             "options": chosen.get("options", []) if chosen else [],
+                             "cell_boxes": chosen.get("cell_boxes", []) if chosen else []})
     else:
         values, evidence = {}, []
         for field in candidates:

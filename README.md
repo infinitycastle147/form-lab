@@ -54,20 +54,35 @@ The program records unavailable routes as such, preserving comparable document r
 
 ## Dynamic extraction (separate workflow)
 
-Open **Dynamic extraction** at `/dynamic`. Enter the required output schema as JSON, then upload a completed PDF. The page uploads the PDF and starts extraction automatically; editing the schema afterward enables a new run. The result is a flat JSON object with exactly the requested keys. Missing, conflicting, or invalid values are `null`; the inspection panel shows the matched question, page, source, and review status. Use **Download JSON** for the values object.
+Open **Dynamic extraction** at `/dynamic`. Enter the required output schema as JSON, then upload a completed PDF. The page uploads the PDF and starts extraction automatically; editing the schema afterward enables a new run. Results appear in a separate full-width review section with a large page preview and field evidence. Selecting a field highlights its source on the corrected page. The result is a JSON object with exactly the requested top-level keys; table values contain row objects. Missing, conflicting, or invalid values are `null`; the inspection panel shows the matched question, page, source, and review status. Use **Download JSON** for the values object.
 
-The schema can be a list of keys or an object with descriptions, types (`string`, `date`, `number`, `boolean`, `choice`), aliases, and `allowed_values`. Descriptions and aliases are especially useful when a form question uses different wording from the output key. For example:
+The schema can be a list of keys or an object with descriptions, types (`string`, `date`, `number`, `boolean`, `choice`, `array`, `table`), aliases, and `allowed_values`. Descriptions and aliases are especially useful when a form question uses different wording from the output key. Set `allowed_values` for visual choices; `array` returns all marked selections. A `table` field uses a `columns` map and returns an array of row objects. An `array` with `items.type: "object"` and `items.properties` is also accepted for table rows. The page has a **Load sample form schema** button for the supplied general application form. For example:
 
 ```json
 {
   "applicant_name": {"description": "Full name of the applicant", "aliases": ["Name", "Customer name"]},
-  "date_of_birth": {"description": "Applicant birth date", "type": "date", "aliases": ["DOB", "Birth date"]}
+  "date_of_birth": {"description": "Applicant birth date", "type": "date", "aliases": ["DOB", "Birth date"]},
+  "employment_history": {"type": "table", "aliases": ["Employment History"],
+    "columns": {"from": ["From (MM/YYYY)"], "to": ["To (MM/YYYY)"], "employer": ["Employer"]}}
 }
 ```
 
-This route does not save or require a template. OpenCV rectifies a clear photographed page boundary or moderate tilt, and enlarges only small pages. Extraction uses PDF form widgets and positioned text from local PaddleOCR, with Tesseract fallback for missing fields. The dynamic route never calls Gemini, even if `GEMINI_API_KEY` is configured; the existing comparison routes still work as before. Supply aliases when the form wording differs from a schema key. OCR matches are flagged for review, and handwriting or unfamiliar wording may remain `null`. Results need validation against real completed forms before production use.
+This route does not save or require a template. OpenCV rectifies a clear photographed page boundary or moderate tilt, enlarges only small pages, detects marked selection controls near OCR option labels, and finds ruled table cells. It reconstructs a missing cell boundary when the neighboring rows establish the column grid, then assigns positioned OCR text to cells. Extraction uses PDF form widgets and positioned text from local PaddleOCR, with Tesseract fallback for missing fields. The dynamic route never calls Gemini, even if `GEMINI_API_KEY` is configured; the existing comparison routes still work as before. Supply aliases when the form wording differs from a schema key. OCR text and table rows remain flagged for review, and handwriting or unfamiliar wording may remain `null`. Marked selections are reliable only when the option labels and nearby controls are both detected; faint or conflicting marks are flagged. Borderless, merged-cell, or badly damaged tables may still require manual review. Results need validation against real completed forms before production use.
 
 The first dynamic run can be slow because it recognizes text across the full page and loads the local Paddle models. The app holds a bounded in-memory OCR cache for the latest eight distinct PDFs, so rerunning with an edited schema or re-uploading the same PDF reuses recognized text. Restarting the server clears this cache. The dynamic route shares the Paddle engine with the comparison route to avoid loading two copies into memory.
+
+## Docling Markdown (isolated workflow)
+
+Open **Docling Markdown** at `/docling` to upload a PDF and receive the unmodified string returned by `result.document.export_to_markdown()`. This page has its own API route (`POST /api/docling/convert`) and starts a separate Python worker for each conversion; it does not use templates, alignment, dynamic extraction, or the four comparison pipelines. The page offers Docling PDF options for PaddleOCR and table structure recognition. Both are enabled by default. A small OCR adapter feeds PaddleOCR's recognized text and boxes into Docling's OCR stage; the exported Markdown is not changed afterward. The worker uses the same PaddleOCR 3 package versions and initialization settings as the application, but has its own process and environment. The container installs Docling and PaddleOCR in a dedicated Python environment at `/opt/docling-venv`. For local use, create a separate worker environment:
+
+```sh
+uv venv .venv-docling --python 3.12
+uv pip install --python .venv-docling/bin/python -r requirements-docling.txt
+```
+
+The server detects `.venv-docling/bin/python` automatically on the next status check. Set `DOCLING_PYTHON` to another interpreter path if preferred. The environment must be able to import Docling and the project source. Refresh `/docling` after installation.
+
+The page previews the selected PDF locally in the browser before conversion, with previous/next controls for multiple pages. The viewer uses a bundled copy of Mozilla PDF.js and does not change the Docling conversion. The UI shows total worker time, Docling conversion time, worker CPU time, and sampled worker RAM. CPU percentage expresses CPU seconds as a share of one core's elapsed time, so it can exceed 100% when work uses several cores. RAM is sampled from the worker and its children every 50 ms; short peaks can be missed. The first run may take longer while Docling downloads or loads its models. The raw Markdown viewer, copy button, and `.md` download preserve the exported string. Uploads live only in a temporary directory for the conversion and are deleted afterward.
 
 ## Register and edit form templates
 

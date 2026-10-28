@@ -5,6 +5,7 @@
 .env.*
 .deps
 .venv
+.venv-docling
 venv
 env
 __pycache__

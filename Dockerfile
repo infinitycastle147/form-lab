@@ -15,8 +15,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt /app/requirements.txt
+COPY requirements-docling.txt /app/requirements-docling.txt
 RUN python -m pip install --no-cache-dir -r requirements.txt \
     && python -m pip install --no-cache-dir 'paddlepaddle==3.3.1' 'paddleocr==3.7.0'
+RUN python -m venv /opt/docling-venv \
+    && /opt/docling-venv/bin/pip install --no-cache-dir -r requirements-docling.txt
+
+ENV DOCLING_PYTHON=/opt/docling-venv/bin/python
+ENV DOCLING_CACHE_DIR=/data/docling-cache
 
 COPY poc /app/poc
 COPY web /app/web

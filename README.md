@@ -84,6 +84,30 @@ The server detects `.venv-docling/bin/python` automatically on the next status c
 
 The page previews the selected PDF locally in the browser before conversion, with previous/next controls for multiple pages. The viewer uses a bundled copy of Mozilla PDF.js and does not change the Docling conversion. The UI shows total worker time, Docling conversion time, worker CPU time, and sampled worker RAM. CPU percentage expresses CPU seconds as a share of one core's elapsed time, so it can exceed 100% when work uses several cores. RAM is sampled from the worker and its children every 50 ms; short peaks can be missed. The first run may take longer while Docling downloads or loads its models. The raw Markdown viewer, copy button, and `.md` download preserve the exported string. Uploads live only in a temporary directory for the conversion and are deleted afterward.
 
+## Dolphin and MinerU Markdown (isolated workflows)
+
+Open `/dolphin` or `/mineru` for the same 25 MB PDF upload, local page preview, raw Markdown viewer, copy/download actions, and sampled worker metrics as the Docling page. Each has its own `POST /api/<engine>/convert` and `GET /api/<engine>/status` routes. The commands process all PDF pages and return the exact `.md` file they write. The app does not run templates, alignment, or field extraction on these outputs. Relative image references in generated Markdown refer to temporary parser assets and will not resolve after the request ends.
+
+For **Dolphin-v2**, follow the [official installation and model instructions](https://github.com/bytedance/Dolphin). Clone the repository into `./Dolphin`, create `./.venv-dolphin`, install its `requirements.txt` there, and download the `ByteDance/Dolphin-v2` weights into `./Dolphin/hf_model`. The route invokes `demo_page.py` from that checkout and reads `markdown/input.md` from its temporary output directory. Set `DOLPHIN_REPO`, `DOLPHIN_MODEL_PATH`, or `DOLPHIN_PYTHON` to use other paths. For example:
+
+Dolphin-v2's model weights are about 7.5 GB, and its current CPU path expands them to float32. Use a machine with substantially more than 8 GB RAM for this worker; leave it uninstalled on smaller laptops.
+
+```sh
+git clone https://github.com/bytedance/Dolphin.git Dolphin
+python3 -m venv .venv-dolphin
+.venv-dolphin/bin/pip install -r Dolphin/requirements.txt
+# Download Dolphin-v2 weights using the repository's Hugging Face instructions.
+```
+
+For **MinerU 4**, follow the [official installation instructions](https://github.com/opendatalab/MinerU#installation). Install `mineru>=4.0,<5` into `./.venv-mineru` or set `MINERU_COMMAND` to the installed `mineru` executable. The route runs `mineru parse input.pdf --pages all -o result.md`; `--pages all` avoids the CLI's ten-page PDF default. For example:
+
+```sh
+uv venv .venv-mineru --python 3.12
+uv pip install --python .venv-mineru/bin/python 'mineru>=4.0,<5'
+```
+
+These model runtimes and weights are not included in the default Docker image. Install them in the server environment and configure the paths above before using the new pages. The status check disables conversion until the corresponding command is available. Uploads and parser output live in a temporary directory and are deleted after the response. Run metrics sample the parser process and its children every 50 ms, so short CPU and RAM peaks can be missed.
+
 ## Register and edit form templates
 
 Open **Template studio** from the top navigation or visit `/templates/editor`. Upload a flat, complete blank PDF or image as the reference form; detection starts automatically. Use the page selector to inspect every page, remove false detections, add missed fields, drag or resize boxes, and set stable output names, display labels, text categories, checkbox values, and dropdown values. **Re-detect all pages** reruns detection after changing settings. Interactive PDFs supply exact field rectangles through their AcroForm widgets; scanned pages use OpenCV candidates. The meaning of a field cannot always be inferred reliably, so review is part of registration. Click **Register template**; it appears immediately in the comparison form. Open any registered template there to revise it later. Keep the reference page and mapped boxes in the same orientation.

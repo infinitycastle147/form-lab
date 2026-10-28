@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>MinerU Markdown — Form Lab</title>
+  <link rel="stylesheet" href="/static/docling.css?v=3">
+</head>
+<body>
+  <div class="shell">
+    <header class="masthead">
+      <a class="identity" href="/"><span class="identity-mark">F<span>↗</span></span><span><strong>FORM LAB</strong><small>MINERU / MARKDOWN</small></span></a>
+      <nav aria-label="Sections"><a href="/">Comparison</a><a href="/dynamic">Dynamic extraction</a><a href="/docling">Docling Markdown</a><a href="/dolphin">Dolphin Markdown</a><a href="/mineru" aria-current="page">MinerU Markdown</a><a href="/generator">Form generator</a><a href="/templates/editor">Template studio</a></nav>
+      <span class="masthead-tag">ISOLATED PIPELINE</span>
+    </header>
+
+    <main>
+      <section class="intro">
+        <div><span class="kicker">DOCUMENT CONVERSION / 001</span><h1>PDF in.<br><em>Markdown out.</em></h1><p>MinerU parses every page of your PDF. The output below is the Markdown file written by its document CLI, with no cleanup or field mapping.</p></div>
+        <div class="intro-mark" aria-hidden="true"><span>PDF</span><b>↘</b><span>.MD</span><small>MINERU / DIRECT EXPORT</small></div>
+      </section>
+
+      <section class="workspace" aria-label="MinerU converter">
+        <div class="left-column">
+          <div class="section-title"><span>01 / INPUT</span><span>PDF ONLY · 25 MB MAX</span></div>
+          <label class="dropzone" id="dropzone" for="file"><input id="file" type="file" accept="application/pdf,.pdf"><span class="drop-icon" aria-hidden="true">↥</span><strong>Drop your PDF here</strong><span>or click to choose a file</span><small id="file-label">NO FILE SELECTED</small></label>
+          <section class="pdf-preview" id="preview" aria-label="PDF preview" hidden>
+            <div class="preview-head"><div><span>SELECTED DOCUMENT</span><strong id="preview-name"></strong></div><a id="preview-open" href="#" target="_blank" rel="noopener noreferrer">Open full PDF ↗</a></div>
+            <div class="preview-toolbar"><span>PAGE PREVIEW</span><div><button id="preview-prev" type="button" aria-label="Previous PDF page" disabled>←</button><span id="preview-page">Loading…</span><button id="preview-next" type="button" aria-label="Next PDF page" disabled>→</button></div></div>
+            <div class="preview-body" id="preview-body"><p id="preview-message" role="status">Rendering PDF preview…</p><div id="preview-canvas" aria-label="Rendered PDF page"></div></div>
+          </section>
+          <div class="config-card"><div class="section-title"><span>02 / PIPELINE</span><span>MINERU PDF PARSER</span></div><p>MinerU parses every page of your PDF. The output below is the Markdown file written by its document CLI, with no cleanup or field mapping.</p><p>Install and configure MinerU on the server before converting. <a href="https://github.com/opendatalab/MinerU" target="_blank" rel="noopener noreferrer">Official setup ↗</a></p></div>
+          <button class="convert-button" id="convert" type="button" disabled>Convert to Markdown <span>↗</span></button>
+          <p class="inline-status" id="status" role="status" aria-live="polite">Choose a PDF to begin.</p>
+        </div>
+        <div class="right-column">
+          <div class="section-title"><span>03 / OUTPUT</span><span>DIRECT MINERU EXPORT</span></div>
+          <div class="output-card">
+            <div class="output-head"><div><span>EXTRACTED MARKDOWN</span><strong id="output-title">Waiting for a document</strong></div><div class="output-actions"><button id="copy" type="button" disabled>Copy</button><button id="download" type="button" disabled>Download .md</button></div></div>
+            <div class="empty-state" id="empty"><span>{ md }</span><strong>Your Markdown appears here.</strong><p>Upload a PDF and start the conversion.</p></div>
+            <div class="loading-state" id="loading" hidden><div class="loader" aria-hidden="true"></div><strong>MinerU is reading your PDF</strong><p>Parsing every PDF page and writing Markdown.</p><span id="live-time">00:00 elapsed</span></div>
+            <div class="error-state" id="error" role="alert" hidden></div>
+            <pre id="markdown" aria-label="Raw MinerU Markdown" hidden></pre>
+          </div>
+          <div class="metrics" id="metrics" hidden><div class="section-title"><span>RUN METRICS</span><span>ISOLATED WORKER</span></div><div class="metric-grid"><div><small>Total time</small><strong id="total-time">—</strong></div><div><small>MinerU conversion</small><strong id="conversion-time">—</strong></div><div><small>CPU time</small><strong id="cpu-time">—</strong></div><div><small>CPU use · one core</small><strong id="cpu-percent">—</strong></div><div><small>Worker RAM sampled</small><strong id="ram-end">—</strong></div><div><small>Peak RAM sampled</small><strong id="ram-peak">—</strong></div></div><p>CPU time is the worker process’s user + system time. Peak RAM includes the worker and its children, sampled every 50 ms; brief peaks may be missed.</p></div>
+        </div>
+      </section>
+    </main>
+    <footer>FORM LAB <span>·</span> MINERU MARKDOWN <span>DIRECT EXPORT / NO POST-PROCESSING</span></footer>
+  </div>
+  <script src="/static/mineru.js?v=5" type="module"></script>
+</body>
+</html>

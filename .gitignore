@@ -8,6 +8,9 @@
 # Python environments, caches, and build output
 .venv/
 .venv-docling/
+.venv-dolphin/
+.venv-mineru/
+Dolphin/
 venv/
 env/
 .deps/

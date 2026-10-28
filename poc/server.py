@@ -28,11 +28,13 @@ from .bank_form import PRESETS, TEXT, CHOICES, export as export_bank
 from .core import DATA_DIR, DependencyError, MAX_PAGE_PIXELS, PIPELINES, ROOT, align, render_pdf, run_pipeline, templates, to_png
 from .dynamic_extract import extract as extract_dynamic, normalize_schema, prepare_page
 from .docling_route import router as docling_router
+from .markdown_routes import router as markdown_router
 from .template_detect import detect_pages
 from .template_store import get_template, save_template, validate
 
 app = FastAPI(title="Form Lab")
 app.include_router(docling_router)
+app.include_router(markdown_router)
 logger = logging.getLogger(__name__)
 STORE = DATA_DIR
 STORE.mkdir(parents=True, exist_ok=True)
@@ -144,6 +146,16 @@ def dynamic_page():
 @app.get("/docling")
 def docling_page():
     return FileResponse(ROOT / "web" / "docling.html", headers={"Cache-Control": "no-store"})
+
+
+@app.get("/dolphin")
+def dolphin_page():
+    return FileResponse(ROOT / "web" / "dolphin.html", headers={"Cache-Control": "no-store"})
+
+
+@app.get("/mineru")
+def mineru_page():
+    return FileResponse(ROOT / "web" / "mineru.html", headers={"Cache-Control": "no-store"})
 
 
 @app.get("/style.css", include_in_schema=False)
